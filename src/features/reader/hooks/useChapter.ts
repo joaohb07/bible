@@ -19,6 +19,8 @@ export function useChapter(args: {
     [args.translation, args.book, args.chapter]
   );
 
+  const [reloadTick, setReloadTick] = useState(0);
+
   const [state, setState] = useState<State>(() => {
     const hit = cache.get(key);
     if (hit) return { loading: false, data: hit };
@@ -55,7 +57,11 @@ export function useChapter(args: {
     return () => {
       cancelled = true;
     };
-  }, [key, args.translation, args.book, args.chapter]);
+  }, [key, args.translation, args.book, args.chapter, reloadTick]);
 
-  return state;
+  return {
+    ...state,
+    reload: () => setReloadTick((x) => x + 1),
+  };
+
 }
