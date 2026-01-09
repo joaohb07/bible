@@ -1,0 +1,9 @@
+{
+  "book": "genesis",
+  "chapter": 1,
+  "verses": [
+    { "verse": 1, "text": "No princípio Deus criou o céu e a terra." },
+    { "verse": 2, "text": "A terra era sem forma e vazia..." },
+    { "verse": 3, "text": "Disse Deus: \"Haja luz\"; e houve luz." }
+  ]
+}
