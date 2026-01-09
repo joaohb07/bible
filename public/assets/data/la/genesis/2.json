@@ -1,0 +1,9 @@
+{
+  "book": "genesis",
+  "chapter": 2,
+  "verses": [
+    { "verse": 1, "text": "Igitur perfecti sunt caeli et terra." },
+    { "verse": 2, "text": "Requievit Deus die septimo ab universo opere." },
+    { "verse": 3, "text": "Benedixit diei septimo et sanctificavit illum." }
+  ]
+}

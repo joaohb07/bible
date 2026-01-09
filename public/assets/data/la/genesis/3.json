@@ -1,0 +1,9 @@
+{
+  "book": "genesis",
+  "chapter": 3,
+  "verses": [
+    { "verse": 1, "text": "Sed et serpens erat callidior cunctis animantibus." },
+    { "verse": 2, "text": "Dixit mulier ad serpentem." },
+    { "verse": 3, "text": "Praecepit nobis Deus ne comederemus." }
+  ]
+}

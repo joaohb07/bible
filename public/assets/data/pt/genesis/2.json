@@ -1,0 +1,10 @@
+{
+  "book": "genesis",
+  "chapter": 2,
+  "verses": [
+    { "verse": 1, "text": "Assim foram concluídos os céus e a terra, e tudo o que neles há." },
+    { "verse": 2, "text": "No sétimo dia Deus acabou a obra que tinha feito e descansou de toda a obra que fizera." },
+    { "verse": 3, "text": "Deus abençoou o sétimo dia e o santificou, porque nele descansou de toda a obra que criara e fizera." },
+    { "verse": 4, "text": "Esta é a história das origens dos céus e da terra, quando foram criados." }
+  ]
+}

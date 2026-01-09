@@ -1,0 +1,11 @@
+{
+  "book": "genesis",
+  "chapter": 1,
+  "verses": [
+    { "verse": 1, "text": "No princípio Deus criou o céu e a terra." },
+    { "verse": 2, "text": "A terra era sem forma e vazia; havia trevas sobre a face do abismo, e o Espírito de Deus pairava sobre as águas." },
+    { "verse": 3, "text": "Disse Deus: \"Haja luz\"; e houve luz." },
+    { "verse": 4, "text": "Deus viu que a luz era boa, e separou a luz das trevas." },
+    { "verse": 5, "text": "Deus chamou a luz de Dia e as trevas de Noite. Houve tarde e manhã, o primeiro dia." }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "book": "matthew",
+  "chapter": 1,
+  "verses": [
+    { "verse": 1, "text": "The book of the genealogy of Jesus Christ, the son of David." },
+    { "verse": 2, "text": "Abraham was the father of Isaac." },
+    { "verse": 3, "text": "Judah was the father of Perez and Zerah." }
+  ]
+}

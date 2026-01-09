@@ -1,0 +1,10 @@
+{
+  "book": "genesis",
+  "chapter": 3,
+  "verses": [
+    { "verse": 1, "text": "Ora, a serpente era o mais astuto de todos os animais do campo que o Senhor Deus tinha feito." },
+    { "verse": 2, "text": "Respondeu a mulher à serpente: \"Podemos comer do fruto das árvores do jardim\"." },
+    { "verse": 3, "text": "\"Mas do fruto da árvore que está no meio do jardim, Deus disse: 'Não comam dele, nem toquem nele; do contrário, vocês morrerão'\"." },
+    { "verse": 4, "text": "Disse a serpente à mulher: \"Certamente não morrerão\"." }
+  ]
+}

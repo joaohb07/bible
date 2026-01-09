@@ -1,0 +1,9 @@
+{
+  "book": "matthew",
+  "chapter": 1,
+  "verses": [
+    { "verse": 1, "text": "Livro da genealogia de Jesus Cristo, filho de Davi." },
+    { "verse": 2, "text": "Abraão gerou Isaque; Isaque gerou Jacó." },
+    { "verse": 3, "text": "Judá gerou Perez e Zerá." }
+  ]
+}
