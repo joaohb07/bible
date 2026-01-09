@@ -1,0 +1,9 @@
+{
+  "book": "matthew",
+  "chapter": 3,
+  "verses": [
+    { "verse": 1, "text": "John the Baptist came preaching in the wilderness." },
+    { "verse": 2, "text": "Repent, for the kingdom of heaven is at hand." },
+    { "verse": 3, "text": "This is he who was spoken of by the prophet Isaiah." }
+  ]
+}

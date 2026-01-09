@@ -1,0 +1,9 @@
+{
+  "book": "matthew",
+  "chapter": 2,
+  "verses": [
+    { "verse": 1, "text": "Jesus nasceu em Belém da Judeia." },
+    { "verse": 2, "text": "Vieram magos do Oriente a Jerusalém." },
+    { "verse": 3, "text": "Herodes ficou perturbado." }
+  ]
+}

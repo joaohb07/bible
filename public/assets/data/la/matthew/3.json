@@ -1,0 +1,9 @@
+{
+  "book": "matthew",
+  "chapter": 3,
+  "verses": [
+    { "verse": 1, "text": "In diebus illis venit Ioannes Baptista praedicans." },
+    { "verse": 2, "text": "Paenitentiam agite." },
+    { "verse": 3, "text": "Hic est qui dictus est per Isaiam prophetam." }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "book": "matthew",
+  "chapter": 3,
+  "verses": [
+    { "verse": 1, "text": "João Batista apareceu pregando no deserto." },
+    { "verse": 2, "text": "Arrependei-vos, porque está próximo o Reino dos Céus." },
+    { "verse": 3, "text": "Ele é a voz do que clama no deserto." }
+  ]
+}

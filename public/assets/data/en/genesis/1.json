@@ -1,0 +1,9 @@
+{
+  "book": "genesis",
+  "chapter": 1,
+  "verses": [
+    { "verse": 1, "text": "In the beginning God created the heavens and the earth." },
+    { "verse": 2, "text": "The earth was without form and void, and darkness was over the face of the deep." },
+    { "verse": 3, "text": "And God said, \"Let there be light,\" and there was light." }
+  ]
+}

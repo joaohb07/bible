@@ -1,0 +1,9 @@
+{
+  "book": "genesis",
+  "chapter": 3,
+  "verses": [
+    { "verse": 1, "text": "Now the serpent was more crafty than any other beast of the field." },
+    { "verse": 2, "text": "And the woman said to the serpent." },
+    { "verse": 3, "text": "God said, \"You shall not eat of the fruit of the tree.\""}
+  ]
+}

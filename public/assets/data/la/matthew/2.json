@@ -1,0 +1,9 @@
+{
+  "book": "matthew",
+  "chapter": 2,
+  "verses": [
+    { "verse": 1, "text": "Cum natus esset Iesus in Bethlehem Iudaeae." },
+    { "verse": 2, "text": "Magi ab oriente venerunt." },
+    { "verse": 3, "text": "Turbatus est Herodes." }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "book": "matthew",
+  "chapter": 1,
+  "verses": [
+    { "verse": 1, "text": "Liber generationis Iesu Christi, filii David." },
+    { "verse": 2, "text": "Abraham genuit Isaac." },
+    { "verse": 3, "text": "Iudas genuit Phares et Zaram." }
+  ]
+}
