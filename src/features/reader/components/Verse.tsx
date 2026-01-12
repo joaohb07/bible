@@ -7,17 +7,18 @@ export default function Verse(props: {
   onToggleHighlight: () => void;
 }) {
   return (
-    <p
+    <div
       onClick={props.onToggleHighlight}
-      style={{
-        cursor: "pointer",
-        padding: "6px 8px",
-        borderRadius: 8,
-        background: props.highlighted ? "rgba(255,230,120,0.35)" : "transparent",
+      className={`verse-line ${props.highlighted ? "is-highlighted" : ""}`}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") props.onToggleHighlight();
       }}
+      aria-pressed={props.highlighted}
     >
-      <sup style={{ opacity: 0.7, marginRight: 6 }}>{props.refObj.verse}</sup>
-      {props.text}
-    </p>
+      <div className="verse-num">{props.refObj.verse}</div>
+      <div className="verse-text">{props.text}</div>
+    </div>
   );
 }
