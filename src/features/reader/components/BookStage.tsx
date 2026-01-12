@@ -7,7 +7,7 @@ export default function BookStage(props: {
   chapter: number;
 }) {
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto" }}>
+    <div className="app-stage">
       <BookOpen {...props} />
     </div>
   );

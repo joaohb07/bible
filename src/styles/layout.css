@@ -1,0 +1,67 @@
+/* src/styles/layout.css */
+
+/* Dark desk background + vignette */
+:root {
+  --desk-bg-0: #0b0d12;
+  --desk-bg-1: #0f1320;
+
+  --stage-max: 1300px;
+  --stage-pad: clamp(14px, 2.2vw, 28px);
+
+  --ink: rgba(0, 0, 0, 0.86);
+  --muted: rgba(0, 0, 0, 0.62);
+}
+
+body {
+  min-height: 100vh;
+  color: var(--ink);
+
+  /* base dark desk */
+  background:
+    radial-gradient(1200px 700px at 50% 10%, rgba(255,255,255,0.06), transparent 60%),
+    radial-gradient(900px 600px at 20% 30%, rgba(255,255,255,0.03), transparent 55%),
+    radial-gradient(900px 600px at 80% 30%, rgba(255,255,255,0.03), transparent 55%),
+    linear-gradient(160deg, var(--desk-bg-0), var(--desk-bg-1));
+}
+
+/* subtle vignette overlay */
+#root {
+  min-height: 100vh;
+  position: relative;
+}
+
+#root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    1200px 800px at 50% 25%,
+    rgba(0, 0, 0, 0) 45%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  opacity: 1;
+  z-index: 0;
+}
+
+
+/* app stage container */
+.app-stage {
+  position: relative;
+  z-index: 1;
+
+  max-width: var(--stage-max);
+  margin: 0 auto;
+  padding: var(--stage-pad);
+
+  display: grid;
+  gap: 16px;
+}
+
+/* Optional: give UI elements a consistent "glass" feel over dark desk */
+.glass {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+}
