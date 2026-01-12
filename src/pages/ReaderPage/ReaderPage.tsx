@@ -27,10 +27,6 @@ export default function ReaderPage() {
       <div style={{ marginTop: 16 }}>
         <BookStage translation={t} book={b} chapter={c} />
       </div>
-      <div style={{ marginTop: 18 }}>
-        <LanguagePicker translation={t} bookId={b} chapter={c} />
-      </div>
-
 
       <DrawerNav
         open={open}

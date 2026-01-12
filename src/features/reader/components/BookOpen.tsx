@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { BookId, TranslationId } from "../../../shared/bible/refs";
 import { getBookById } from "../../../shared/bible/books";
 import ChapterView from "./ChapterView";
+import LanguagePicker from "../../settings/components/LanguagePicker";
 import { useChapter } from "../hooks/useChapter";
 
 export default function BookOpen(props: {
@@ -46,6 +47,17 @@ export default function BookOpen(props: {
               chapter={props.chapter}
               data={res.data}
             />
+            <div className="book-footer">
+              <div className="book-footer-left">Translation</div>
+
+              <div className="lang-row">
+                <LanguagePicker
+                  translation={props.translation}
+                  bookId={props.book}
+                  chapter={props.chapter}
+                />
+              </div>
+            </div>
           </div>
         </section>
 
