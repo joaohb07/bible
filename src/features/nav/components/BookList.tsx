@@ -8,23 +8,15 @@ export default function BookList(props: {
   onSelect: (bookId: string) => void;
 }) {
   return (
-    <div style={{ marginTop: 12 }}>
-      <div style={{ fontWeight: 600, marginBottom: 8 }}>Livros</div>
-      <div style={{ display: "grid", gap: 6 }}>
+    <div className="book-list">
+      <div className="book-list-item-list">
         {props.books.map((b) => {
           const active = b.id === props.activeBookId;
           return (
             <button
               key={b.id}
               onClick={() => props.onSelect(b.id)}
-              style={{
-                textAlign: "left",
-                padding: "10px 12px",
-                borderRadius: 10,
-                border: "1px solid #ddd",
-                background: active ? "rgba(0,0,0,0.08)" : "#fff",
-                cursor: "pointer",
-              }}
+              className={`nav-item ${active ? "is-active" : ""}`}
             >
               {b.names[props.translation]}
             </button>

@@ -41,7 +41,8 @@ export default function DrawerNav(props: {
   return (
     <Drawer open={props.open} onClose={props.onClose} title="Navegação">
       <TestamentTabs value={testament} onChange={setTestament} />
-
+      
+      <div className="nav-section-title">Livros</div>
       <BookList
         translation={props.translation}
         books={books}
@@ -49,6 +50,7 @@ export default function DrawerNav(props: {
         onSelect={(bookId) => go(bookId, 1)}
       />
 
+      <div className="nav-section-title">Capítulos - {safeBookId}</div>
       <ChapterList
         chapters={safeChapters}
         activeChapter={props.chapter}
@@ -56,4 +58,5 @@ export default function DrawerNav(props: {
       />
     </Drawer>
   );
-}
+
+  }

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 export default function Drawer(props: {
   open: boolean;
@@ -6,44 +6,41 @@ export default function Drawer(props: {
   title?: string;
   children: ReactNode;
 }) {
+  useEffect(() => {
+    if (!props.open) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") props.onClose();
+    };
+
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [props.open, props.onClose]);
+
   if (!props.open) return null;
 
   return (
     <div
       role="dialog"
       aria-modal="true"
+      className="drawer-overlay"
       onClick={props.onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.4)",
-        display: "flex",
-        justifyContent: "flex-end",
-        zIndex: 50,
-      }}
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          width: 360,
-          maxWidth: "90vw",
-          height: "100%",
-          background: "#fff",
-          padding: 16,
-          boxShadow: "-8px 0 24px rgba(0,0,0,0.25)",
-          overflow: "auto",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <strong style={{ fontSize: 18, flex: 1 }}>
-            {props.title ?? "Menu"}
-          </strong>
-          <button onClick={props.onClose} aria-label="Close">
-            ✕
-          </button>
-        </div>
+      <div className="nav-drawer" onClick={(e) => e.stopPropagation()}>
+        <div className="nav-card">
+          <div className="nav-title-row">
+            <h3 className="nav-title">{props.title ?? "Menu"}</h3>
+            <button
+              className="nav-close-btn"
+              onClick={props.onClose}
+              aria-label="Close"
+            >
+              ✕
+            </button>
+          </div>
 
-        <div style={{ marginTop: 16 }}>{props.children}</div>
+          <div className="nav-body">{props.children}</div>
+        </div>
       </div>
     </div>
   );
