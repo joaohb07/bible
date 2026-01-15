@@ -9,6 +9,7 @@ export default function BookOpen(props: {
   translation: TranslationId;
   book: BookId;
   chapter: number;
+  onOpenNav: () => void;
 }) {
   const res = useChapter(props);
 
@@ -22,8 +23,6 @@ export default function BookOpen(props: {
   if (res.error) return <div className="glass" style={{ padding: 16 }}>Error: {res.error}</div>;
   if (!res.data) return null;
 
-
-  // res.data is guaranteed here because loading/error are handled
   return (
     <div className="book-spread">
       <div className="book-gutter" />
@@ -32,6 +31,16 @@ export default function BookOpen(props: {
         {/* Left page */}
         <section className="page page-left" aria-label="Left page">
           <header className="page-header">
+            <button
+              type="button"
+              className="page-nav-btn"
+              onClick={props.onOpenNav}
+              aria-label="Open menu"
+              title="Menu"
+            >
+              ☰
+            </button>
+
             <div>
               <h2>{title}</h2>
               <div className="page-sub">
@@ -47,6 +56,7 @@ export default function BookOpen(props: {
               chapter={props.chapter}
               data={res.data}
             />
+
             <div className="book-footer">
               <div className="book-footer-left">Translation</div>
 

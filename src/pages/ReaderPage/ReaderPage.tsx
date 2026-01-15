@@ -2,8 +2,6 @@ import { useParams } from "react-router-dom";
 import { useState } from "react";
 import BookStage from "../../features/reader/components/BookStage";
 import DrawerNav from "../../features/nav/components/DrawerNav";
-import LanguagePicker from "../../features/settings/components/LanguagePicker";
-import ReaderHeader from "../../features/reader/components/ReaderHeader";
 import type { TranslationId } from "../../shared/bible/refs";
 
 export default function ReaderPage() {
@@ -16,16 +14,13 @@ export default function ReaderPage() {
 
   return (
     <div style={{ padding: 24 }}>
-      <ReaderHeader
-        translation={t}
-        bookId={b}
-        chapter={c}
-        onOpenNav={() => setOpen(true)}
-      />
-
-
       <div style={{ marginTop: 16 }}>
-        <BookStage translation={t} book={b} chapter={c} />
+        <BookStage
+          translation={t}
+          book={b}
+          chapter={c}
+          onOpenNav={() => setOpen(true)}
+        />
       </div>
 
       <DrawerNav

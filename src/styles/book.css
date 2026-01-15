@@ -3,6 +3,7 @@
 :root {
   --paper: #f7f2e8;         /* off-white (future pages) */
   --paper-edge: #efe6d7;
+  --ink: rgba(0,0,0,0.86);
 
   --cover: #3a2416;         /* deep brown */
   --cover-2: #2e1b10;       /* darker edge */
@@ -204,10 +205,32 @@
 
 /* Reader header inside page */
 .page-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr;
   align-items: center;
   gap: 12px;
   margin-bottom: 18px;
+}
+
+.page-nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.70);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.page-nav-btn:hover {
+  background: rgba(255,255,255,0.92);
+}
+
+.page-nav-btn:active {
+  transform: translateY(1px);
 }
 
 .page-header h2 {
@@ -217,6 +240,7 @@
   letter-spacing: 0.01em;
   font-size: clamp(22px, 2.2vw, 28px);
 }
+
 
 .page-sub {
   margin-top: 2px;
