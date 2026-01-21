@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { BookId, TranslationId } from "../../../shared/bible/refs";
 import { getBookById } from "../../../shared/bible/books";
 import ChapterView from "./ChapterView";
 import LanguagePicker from "../../settings/components/LanguagePicker";
+import BottomSheet from "../../../shared/ui/BottomSheet";
 import { useChapter } from "../hooks/useChapter";
 
 export default function BookOpen(props: {
@@ -12,6 +13,7 @@ export default function BookOpen(props: {
   onOpenNav: () => void;
 }) {
   const res = useChapter(props);
+  const [langOpen, setLangOpen] = useState(false);
 
   const title = useMemo(() => {
     const b = getBookById(props.book);
@@ -19,8 +21,18 @@ export default function BookOpen(props: {
     return `${name} ${props.chapter}`;
   }, [props.translation, props.book, props.chapter]);
 
-  if (res.loading) return <div className="glass" style={{ padding: 16 }}>Loading…</div>;
-  if (res.error) return <div className="glass" style={{ padding: 16 }}>Error: {res.error}</div>;
+  if (res.loading)
+    return (
+      <div className="glass">
+        Loading…
+      </div>
+    );
+  if (res.error)
+    return (
+      <div className="glass">
+        Error: {res.error}
+      </div>
+    );
   if (!res.data) return null;
 
   return (
@@ -58,17 +70,30 @@ export default function BookOpen(props: {
             />
 
             <div className="book-footer">
-              <div className="book-footer-left">Translation</div>
-
-              <div className="lang-row">
-                <LanguagePicker
-                  translation={props.translation}
-                  bookId={props.book}
-                  chapter={props.chapter}
-                />
-              </div>
+              <button
+                type="button"
+                className="lang-pill"
+                onClick={() => setLangOpen(true)}
+                aria-label="Open translation selector"
+                title="Translation"
+              >
+                Translation: {props.translation.toUpperCase()} ▴
+              </button>
             </div>
           </div>
+
+          <BottomSheet
+            open={langOpen}
+            onClose={() => setLangOpen(false)}
+            title="Select translation"
+          >
+            <LanguagePicker
+              translation={props.translation}
+              bookId={props.book}
+              chapter={props.chapter}
+              onDone={() => setLangOpen(false)}
+            />
+          </BottomSheet>
         </section>
 
         {/* Right page (empty for now) */}

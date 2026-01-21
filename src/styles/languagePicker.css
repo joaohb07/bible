@@ -1,0 +1,26 @@
+.lang-picker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.lang-btn {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.lang-btn:hover {
+  background: #f4f4f4;
+}
+
+.lang-btn.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}

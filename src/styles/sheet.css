@@ -1,0 +1,55 @@
+/* Bottom Sheet (Language Picker) */
+
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 40;
+}
+
+.sheet {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(520px, 100vw);
+  max-height: 80vh;
+
+  background: linear-gradient(180deg, #f7f2e8, #efe6d7);
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -20px 60px rgba(0,0,0,0.45);
+  z-index: 41;
+
+  padding: 12px 18px 22px;
+  animation: sheet-up 220ms ease-out;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateX(-50%) translateY(100%);
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.sheet-handle {
+  width: 42px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.25);
+  margin: 4px auto 12px;
+}
+
+.sheet-title {
+  text-align: center;
+  font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.sheet-content {
+  display: flex;
+  justify-content: center;
+}
