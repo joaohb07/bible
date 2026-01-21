@@ -21,18 +21,8 @@ export default function BookOpen(props: {
     return `${name} ${props.chapter}`;
   }, [props.translation, props.book, props.chapter]);
 
-  if (res.loading)
-    return (
-      <div className="glass">
-        Loading…
-      </div>
-    );
-  if (res.error)
-    return (
-      <div className="glass">
-        Error: {res.error}
-      </div>
-    );
+  if (res.loading) return <div className="glass" style={{ padding: 16 }}>Loading…</div>;
+  if (res.error) return <div className="glass" style={{ padding: 16 }}>Error: {res.error}</div>;
   if (!res.data) return null;
 
   return (
@@ -68,32 +58,7 @@ export default function BookOpen(props: {
               chapter={props.chapter}
               data={res.data}
             />
-
-            <div className="book-footer">
-              <button
-                type="button"
-                className="lang-pill"
-                onClick={() => setLangOpen(true)}
-                aria-label="Open translation selector"
-                title="Translation"
-              >
-                Translation: {props.translation.toUpperCase()} ▴
-              </button>
-            </div>
           </div>
-
-          <BottomSheet
-            open={langOpen}
-            onClose={() => setLangOpen(false)}
-            title="Select translation"
-          >
-            <LanguagePicker
-              translation={props.translation}
-              bookId={props.book}
-              chapter={props.chapter}
-              onDone={() => setLangOpen(false)}
-            />
-          </BottomSheet>
         </section>
 
         {/* Right page (empty for now) */}
@@ -103,6 +68,32 @@ export default function BookOpen(props: {
           </div>
         </section>
       </div>
+
+      {/* EXTRA "mini page" under the spread */}
+      <div className="book-underbar">
+        <button
+          type="button"
+          className="lang-pill"
+          onClick={() => setLangOpen(true)}
+          aria-label="Open translation selector"
+          title="Translation"
+        >
+          Translation: {props.translation.toUpperCase()} ▴
+        </button>
+      </div>
+
+      <BottomSheet
+        open={langOpen}
+        onClose={() => setLangOpen(false)}
+        title="Select translation"
+      >
+        <LanguagePicker
+          translation={props.translation}
+          bookId={props.book}
+          chapter={props.chapter}
+          onDone={() => setLangOpen(false)}
+        />
+      </BottomSheet>
     </div>
   );
 }

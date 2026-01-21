@@ -14,6 +14,12 @@
 
   --shadow-strong: 0 28px 70px rgba(0, 0, 0, 0.55);
   --shadow-soft: 0 14px 38px rgba(0, 0, 0, 0.35);
+
+  --book-frame-pad: clamp(12px, 1.6vw, 18px);
+  --book-spread-h: min(78vh, 820px);
+  --book-underbar-h: 56px; /* extra strip */
+  --book-gap: 12px;        /* space between spread and underbar */
+  --book-total-h: calc(var(--book-spread-h) + var(--book-gap) + var(--book-underbar-h));
 }
 
 /* Center helper for Home */
@@ -131,18 +137,24 @@
 .book-spread {
   width: 100%;
   max-width: 1280px;
-  max-height: 90vh;
   margin: 0 auto;
   border-radius: 22px;
   box-shadow: var(--shadow-strong);
   position: relative;
 
-  /* subtle outer frame */
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
 
-  padding: clamp(12px, 1.6vw, 18px);
+  padding: var(--book-frame-pad);
+
+  /* IMPORTANT: make frame contain inner + underbar */
+  display: flex;
+  flex-direction: column;
+  gap: var(--book-gap);
+  height: calc(var(--book-total-h) + (var(--book-frame-pad) * 2));
+  overflow: hidden; /* ensures nothing visually escapes the frame */
 }
+
 
 .book-spread-inner {
   border-radius: 18px;
@@ -153,14 +165,17 @@
   gap: 0;
 
   background: linear-gradient(90deg, rgba(0,0,0,0.10), transparent 22%, transparent 78%, rgba(0,0,0,0.10));
-  height: min(78vh, 820px);
+  height: var(--book-spread-h);
 }
 
 /* center gutter (the fold) */
 .book-gutter {
   position: absolute;
-  top: 16px;
-  bottom: 16px;
+  top: var(--book-frame-pad);
+
+  /* Before underbar + gap + frame pad */
+  bottom: calc(var(--book-frame-pad) + var(--book-underbar-h) + var(--book-gap));
+
   left: 50%;
   width: 34px;
   transform: translateX(-50%);
@@ -304,9 +319,17 @@
 
 /* Mobile: stack pages */
 @media (max-width: 880px) {
+  :root {
+    --book-frame-pad: 10px;
+    --book-gap: 10px;
+    --book-underbar-h: 52px;
+
+    /* fix required on mobile */
+    --book-spread-h: calc(100dvh - 200px);
+    --book-total-h: calc(var(--book-spread-h) + var(--book-gap) + var(--book-underbar-h));
+  }
+
   .book-spread {
-    width: 100%;
-    padding: 10px;
     border-radius: 18px;
   }
 
@@ -316,7 +339,7 @@
 
   .book-spread-inner {
     grid-template-columns: 1fr;
-    height: calc(100dvh - 120px); /* mais estável que vh */
+    height: var(--book-spread-h);
   }
 
   .book-gutter {
@@ -326,39 +349,14 @@
   .page-right {
     display: none;
   }
+
+  .book-underbar {
+    border-radius: 14px;
+    padding: 10px;
+    height: var(--book-underbar-h);
+  }
 }
 
-/* =========================
-   Book Footer (Language)
-   ========================= */
-
-.book-footer {
-  margin-top: 22px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(0,0,0,0.08);
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.book-footer-left {
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 12px;
-  color: rgba(0,0,0,0.55);
-}
-
-.lang-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-/* If your LanguagePicker renders buttons, these styles will harmonize it */
-.lang-row button {
-  border-radius: 999px;
-}
 
 /* Make footer nice on small screens */
 @media (max-width: 520px) {
@@ -381,3 +379,39 @@
   background: rgba(255,255,255,0.95);
 }
 
+/* =========================
+   Underbar (extra mini-page under spread)
+   ========================= */
+
+.book-underbar {
+  margin-top: 0; /* gap is controlled by .book-spread */
+  width: 100%;
+  border-radius: 18px;
+
+  background: linear-gradient(180deg, var(--paper), #f3ecdf);
+  padding: 12px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,0.06),
+    inset 0 10px 26px rgba(0,0,0,0.05);
+}
+
+
+
+/* optional: make it feel like a small parchment strip */
+.book-underbar::before {
+  content: "";
+  position: absolute;
+  opacity: 0;
+}
+
+/* The pill already exists; just ensure it sits nicely */
+.book-underbar .lang-pill {
+  background: rgba(255,255,255,0.86);
+  border: 1px solid rgba(0,0,0,0.14);
+  box-shadow: 0 10px 18px rgba(0,0,0,0.12);
+}
