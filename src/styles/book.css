@@ -129,7 +129,9 @@
    ========================= */
 
 .book-spread {
-  width: min(1280px, 98vw);
+  width: 100%;
+  max-width: 1280px;
+  max-height: 90vh;
   margin: 0 auto;
   border-radius: 22px;
   box-shadow: var(--shadow-strong);
@@ -151,6 +153,7 @@
   gap: 0;
 
   background: linear-gradient(90deg, rgba(0,0,0,0.10), transparent 22%, transparent 78%, rgba(0,0,0,0.10));
+  height: min(78vh, 820px);
 }
 
 /* center gutter (the fold) */
@@ -173,10 +176,15 @@
 .page {
   background: linear-gradient(180deg, var(--paper), #f3ecdf);
   color: var(--ink);
-  min-height: min(72vh, 760px);
 
+  height: 100%;          /* << agora a page preenche o spread */
+  min-height: 0;         /* << importante pro flex + scroll funcionar */
   padding: clamp(18px, 2.2vw, 30px);
   position: relative;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* subtle paper edge */
@@ -210,6 +218,7 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 18px;
+  flex: 0 0 auto;
 }
 
 .page-nav-btn {
@@ -254,7 +263,26 @@
   font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
   font-size: clamp(18px, 1.6vw, 20px);
   line-height: 1.75;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-right: 6px; /* space for scrollbar */
+  margin-right: -6px; /* keeps text aligned */
 }
+
+.chapter-body::-webkit-scrollbar {
+  width: 10px;
+}
+
+.chapter-body::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.18);
+  border-radius: 999px;
+  border: 3px solid rgba(255,255,255,0.35);
+}
+
+.chapter-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 
 .verse-line {
   display: grid;
@@ -276,17 +304,27 @@
 
 /* Mobile: stack pages */
 @media (max-width: 880px) {
+  .book-spread {
+    width: 100%;
+    padding: 10px;
+    border-radius: 18px;
+  }
+
+  .page {
+    padding: 16px;
+  }
+
   .book-spread-inner {
     grid-template-columns: 1fr;
+    height: calc(100dvh - 120px); /* mais estável que vh */
   }
+
   .book-gutter {
     display: none;
   }
-  .page {
-    min-height: auto;
-  }
+
   .page-right {
-    display: none; /* keep it simple for now */
+    display: none;
   }
 }
 

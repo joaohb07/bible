@@ -13,15 +13,13 @@ export default function ReaderPage() {
   const c = Number(chapter ?? "1") || 1;
 
   return (
-    <div style={{ padding: 24 }}>
-      <div style={{ marginTop: 16 }}>
-        <BookStage
-          translation={t}
-          book={b}
-          chapter={c}
-          onOpenNav={() => setOpen(true)}
-        />
-      </div>
+    <div className="reader-page">
+      <BookStage
+        translation={t}
+        book={b}
+        chapter={c}
+        onOpenNav={() => setOpen(true)}
+      />
 
       <DrawerNav
         open={open}

@@ -66,3 +66,17 @@ body {
   border-radius: 16px;
   padding: 16px;
 }
+
+/* Reduz padding do palco no mobile */
+@media (max-width: 880px) {
+  :root {
+    --stage-pad: 12px;
+  }
+}
+
+@media (max-width: 520px) {
+  :root {
+    --stage-pad: 10px;
+  }
+}
+
