@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { BookId, TranslationId } from "../../../shared/bible/refs";
 import { getBookById } from "../../../shared/bible/books";
+import PagedChapterView from "./PagedChapterView";
 import ChapterView from "./ChapterView";
 import LanguagePicker from "../../settings/components/LanguagePicker";
 import BottomSheet from "../../../shared/ui/BottomSheet";
@@ -14,6 +15,16 @@ export default function BookOpen(props: {
 }) {
   const res = useChapter(props);
   const [langOpen, setLangOpen] = useState(false);
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 880px)");
+    const apply = () => setIsMobile(mq.matches);
+
+    apply();
+    mq.addEventListener?.("change", apply);
+    return () => mq.removeEventListener?.("change", apply);
+  }, []);
 
   const title = useMemo(() => {
     const b = getBookById(props.book);
@@ -52,21 +63,27 @@ export default function BookOpen(props: {
           </header>
 
           <div className="chapter-body">
-            <ChapterView
-              translation={props.translation}
-              book={props.book}
-              chapter={props.chapter}
-              data={res.data}
-            />
+            {isMobile ? (
+              <ChapterView
+                translation={props.translation}
+                book={props.book}
+                chapter={props.chapter}
+                data={res.data}
+              />
+            ) : (
+              <PagedChapterView data={res.data} page="left" />
+            )}
           </div>
         </section>
 
-        {/* Right page (empty for now) */}
-        <section className="page page-right" aria-label="Right page">
-          <div style={{ color: "rgba(0,0,0,0.35)", fontStyle: "italic" }}>
-            {/* Later: pagination / continuation */}
-          </div>
-        </section>
+        {/* Right page (desktop only) */}
+        {!isMobile && (
+          <section className="page page-right" aria-label="Right page">
+            <div className="chapter-body">
+              <PagedChapterView data={res.data} page="right" />
+            </div>
+          </section>
+        )}
       </div>
 
       {/* EXTRA "mini page" under the spread */}
