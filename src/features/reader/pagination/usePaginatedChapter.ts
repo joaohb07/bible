@@ -4,7 +4,7 @@ import { buildPageBreaks, sliceByBreaks } from "./paginateVerses";
 import type { VerseMeasurerRef } from "./PaginationMeasureHost";
 
 export function usePaginatedChapter(params: {
-  data: ChapterData;
+  data: ChapterData | null;
   pageWidthPx: number;
   pageHeightPx: number;
   enabled: boolean;
@@ -12,15 +12,16 @@ export function usePaginatedChapter(params: {
   const { data, pageWidthPx, pageHeightPx, enabled } = params;
 
   const measurerRef = useRef<VerseMeasurerRef | null>(null);
-
   const [breaks, setBreaks] = useState<number[] | null>(null);
-  const verses = data.verses ?? [];
+
+  const verses = data?.verses ?? [];
 
   useEffect(() => {
     let alive = true;
 
     async function run() {
       if (!enabled) return;
+      if (!data) return;
       if (!measurerRef.current) return;
       if (pageWidthPx <= 0 || pageHeightPx <= 0) return;
 
@@ -39,7 +40,7 @@ export function usePaginatedChapter(params: {
     return () => {
       alive = false;
     };
-  }, [enabled, verses, pageWidthPx, pageHeightPx]);
+  }, [enabled, data, verses, pageWidthPx, pageHeightPx]);
 
   const pages = useMemo(() => {
     if (!breaks) return null;
