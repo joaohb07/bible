@@ -1,0 +1,211 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { VerseData } from "./types";
+
+type PagingCache = {
+  v: 1;
+  breaks: number[];
+  pages: number;
+};
+
+function safeParse<T>(s: string | null): T | null {
+  if (!s) return null;
+  try {
+    return JSON.parse(s) as T;
+  } catch {
+    return null;
+  }
+}
+
+function lsGet(key: string) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+function lsSet(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // ignore
+  }
+}
+
+function computeBreaksByOffsets(params: {
+  tops: number[];
+  bottoms: number[];
+  pageHeight: number;
+}) {
+  const { tops, bottoms, pageHeight } = params;
+
+  const n = tops.length;
+  const breaks: number[] = [0];
+
+  let start = 0;
+  while (start < n) {
+    const limit = tops[start] + pageHeight;
+
+    let i = start;
+    while (i < n && bottoms[i] <= limit) i++;
+
+    // safety: sempre avança
+    if (i <= start) i = start + 1;
+
+    breaks.push(i);
+    start = i;
+  }
+
+  // remove duplicados
+  const out: number[] = [];
+  for (const b of breaks) {
+    if (out.length === 0 || out[out.length - 1] !== b) out.push(b);
+  }
+  return out;
+}
+
+function sliceByBreaks<T>(items: T[], breaks: number[]) {
+  const pages: T[][] = [];
+  for (let i = 0; i < breaks.length - 1; i++) {
+    const a = breaks[i];
+    const b = breaks[i + 1];
+    if (b > a) pages.push(items.slice(a, b));
+  }
+  return pages;
+}
+
+export function useAnchoredPagination(params: {
+  verses: VerseData[];
+  enabled: boolean;
+  pageHeightPx: number;
+
+  chapterKey: string;
+  layoutKey: string;
+
+  hostRef: React.RefObject<HTMLElement | null>;
+
+  debounceMs?: number;
+}) {
+  const {
+    verses,
+    enabled,
+    pageHeightPx,
+    chapterKey,
+    layoutKey,
+    hostRef,
+    debounceMs = 180,
+  } = params;
+
+  const cacheKey = useMemo(
+    () => `bible:paging:${chapterKey}:${layoutKey}`,
+    [chapterKey, layoutKey]
+  );
+
+  const [breaks, setBreaks] = useState<number[] | null>(null);
+  const [isComputing, setIsComputing] = useState(false);
+
+  // ✅ cache imediato
+  useEffect(() => {
+    const cached = safeParse<PagingCache>(lsGet(cacheKey));
+    if (cached?.v === 1 && Array.isArray(cached.breaks) && cached.breaks.length >= 2) {
+      setBreaks(cached.breaks);
+    } else {
+      setBreaks(null);
+    }
+  }, [cacheKey]);
+
+  const tokenRef = useRef(0);
+  const timerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    if (!enabled) return;
+    if (!verses.length) return;
+    if (!(pageHeightPx > 0)) return;
+    if (!hostRef.current) return;
+
+    const myToken = ++tokenRef.current;
+
+    timerRef.current = window.setTimeout(() => {
+      (async () => {
+        setIsComputing(true);
+
+        // duas RAF pra garantir layout assentado
+        await new Promise<void>((r) => requestAnimationFrame(() => r()));
+        await new Promise<void>((r) => requestAnimationFrame(() => r()));
+
+        if (tokenRef.current !== myToken) return;
+
+        const host = hostRef.current;
+        if (!host) return;
+
+        const nodes = host.querySelectorAll<HTMLElement>("[data-verse-idx]");
+        const tops: number[] = [];
+        const bottoms: number[] = [];
+
+        nodes.forEach((el) => {
+          const idxStr = el.getAttribute("data-verse-idx");
+          if (idxStr == null) return;
+          const idx = Number(idxStr);
+          if (!Number.isFinite(idx)) return;
+
+          const top = el.offsetTop;
+          const bottom = top + el.offsetHeight;
+
+          tops[idx] = top;
+          bottoms[idx] = bottom;
+        });
+
+        // se por algum motivo faltou, cai pra 1 verso por página
+        if (tops.length !== verses.length || bottoms.length !== verses.length) {
+          const fallback: number[] = [0];
+          for (let i = 1; i <= verses.length; i++) fallback.push(i);
+          setBreaks(fallback);
+          lsSet(
+            cacheKey,
+            JSON.stringify({ v: 1, breaks: fallback, pages: fallback.length - 1 } satisfies PagingCache)
+          );
+          setIsComputing(false);
+          return;
+        }
+
+        const nextBreaks = computeBreaksByOffsets({
+          tops,
+          bottoms,
+          pageHeight: pageHeightPx,
+        });
+
+        if (tokenRef.current !== myToken) return;
+
+        setBreaks(nextBreaks);
+        lsSet(
+          cacheKey,
+          JSON.stringify({
+            v: 1,
+            breaks: nextBreaks,
+            pages: Math.max(0, nextBreaks.length - 1),
+          } satisfies PagingCache)
+        );
+
+        setIsComputing(false);
+      })();
+    }, debounceMs);
+
+    return () => {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [enabled, verses, pageHeightPx, cacheKey, hostRef, debounceMs]);
+
+  const pages = useMemo(() => {
+    if (!breaks) return null;
+    return sliceByBreaks(verses, breaks);
+  }, [verses, breaks]);
+
+  return { pages, breaks, isComputing };
+}

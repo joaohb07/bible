@@ -1,5 +1,8 @@
 /* src/styles/book.css */
 
+/* =========================
+   Tokens / Theme
+   ========================= */
 :root {
   --paper: #f7f2e8;         /* off-white (future pages) */
   --paper-edge: #efe6d7;
@@ -22,17 +25,21 @@
   --book-total-h: calc(var(--book-spread-h) + var(--book-gap) + var(--book-underbar-h));
 }
 
-/* Center helper for Home */
+/* =========================
+   Home helper
+   ========================= */
 .home-center {
   min-height: calc(100vh - 32px);
   display: grid;
   place-items: center;
 }
 
-/* Closed book cover */
+/* =========================
+   Closed book (cover)
+   ========================= */
 .book-closed {
   width: min(520px, 92vw);
-  aspect-ratio: 3 / 4; /* book-ish */
+  aspect-ratio: 3 / 4;
   border-radius: 18px;
   position: relative;
   cursor: pointer;
@@ -50,17 +57,15 @@
   transition: transform 240ms ease, box-shadow 240ms ease, filter 240ms ease;
 }
 
-/* small border around cover (fixed, elegant) */
 .book-closed::before {
   content: "";
   position: absolute;
   inset: 12px;
   border-radius: 14px;
-  border: 1px solid rgba(214, 177, 90, 0.22); /* subtle gold border */
+  border: 1px solid rgba(214, 177, 90, 0.22);
   pointer-events: none;
 }
 
-/* spine hint */
 .book-closed::after {
   content: "";
   position: absolute;
@@ -84,7 +89,6 @@
   transform: translateY(-2px) rotateX(1deg) rotateY(-1deg) scale(0.995);
 }
 
-/* Title */
 .book-title {
   position: absolute;
   inset: 0;
@@ -106,7 +110,6 @@
     0 12px 28px rgba(0,0,0,0.45);
 }
 
-/* Subtitle / CTA */
 .book-cta {
   position: absolute;
   left: 0;
@@ -131,9 +134,8 @@
 }
 
 /* =========================
-   Open Book (Spread)
+   Open book (spread)
    ========================= */
-
 .book-spread {
   width: 100%;
   max-width: 1280px;
@@ -147,14 +149,13 @@
 
   padding: var(--book-frame-pad);
 
-  /* IMPORTANT: make frame contain inner + underbar */
   display: flex;
   flex-direction: column;
   gap: var(--book-gap);
-  height: calc(var(--book-total-h) + (var(--book-frame-pad) * 2));
-  overflow: hidden; /* ensures nothing visually escapes the frame */
-}
 
+  height: calc(var(--book-total-h) + (var(--book-frame-pad) * 2));
+  overflow: hidden;
+}
 
 .book-spread-inner {
   border-radius: 18px;
@@ -164,18 +165,23 @@
   grid-template-columns: 1fr 1fr;
   gap: 0;
 
-  background: linear-gradient(90deg, rgba(0,0,0,0.10), transparent 22%, transparent 78%, rgba(0,0,0,0.10));
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.10),
+    transparent 22%,
+    transparent 78%,
+    rgba(0,0,0,0.10)
+  );
+
   height: var(--book-spread-h);
+  min-height: 0;
 }
 
 /* center gutter (the fold) */
 .book-gutter {
   position: absolute;
   top: var(--book-frame-pad);
-
-  /* Before underbar + gap + frame pad */
   bottom: calc(var(--book-frame-pad) + var(--book-underbar-h) + var(--book-gap));
-
   left: 50%;
   width: 34px;
   transform: translateX(-50%);
@@ -188,21 +194,20 @@
   filter: blur(0.2px);
 }
 
+/* page base */
 .page {
   background: linear-gradient(180deg, var(--paper), #f3ecdf);
   color: var(--ink);
 
-  height: 100%;          /* << agora a page preenche o spread */
-  min-height: 0;         /* << importante pro flex + scroll funcionar */
+  height: 100%;
+  min-height: 0;
+
   padding: clamp(18px, 2.2vw, 30px);
   position: relative;
 
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
 }
 
-/* subtle paper edge */
 .page::after {
   content: "";
   position: absolute;
@@ -213,7 +218,13 @@
     inset 0 10px 30px rgba(0,0,0,0.06);
 }
 
-/* left/right page shading */
+/* ✅ used by BookOpen to enforce flex column without inline styles */
+.page-col {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .page-left {
   background:
     radial-gradient(500px 320px at 88% 42%, rgba(0,0,0,0.10), transparent 60%),
@@ -265,7 +276,6 @@
   font-size: clamp(22px, 2.2vw, 28px);
 }
 
-
 .page-sub {
   margin-top: 2px;
   font-size: 13px;
@@ -273,15 +283,36 @@
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-/* Verse typography polish */
+/* ✅ viewport measured by bodyRef (no inline styles) */
+.page-viewport {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Verse typography */
 .chapter-body {
   font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
   font-size: clamp(18px, 1.6vw, 20px);
   line-height: 1.75;
   flex: 1 1 auto;
+
   overflow-y: auto;
-  padding-right: 6px; /* space for scrollbar */
-  margin-right: -6px; /* keeps text aligned */
+  padding-right: 6px;
+  margin-right: -6px;
+}
+
+/* ✅ paged view shouldn't scroll internally */
+.chapter-body--paged {
+  height: 100%;
+  overflow: hidden;
+  padding-right: 0;
+  margin-right: 0;
+}
+
+/* pagination loading hint */
+.paging-loading {
+  opacity: 0.6;
 }
 
 .chapter-body::-webkit-scrollbar {
@@ -298,7 +329,7 @@
   background: transparent;
 }
 
-
+/* Verse layout */
 .verse-line {
   display: grid;
   grid-template-columns: 28px 1fr;
@@ -317,14 +348,58 @@
   color: rgba(0,0,0,0.86);
 }
 
-/* Mobile: stack pages */
+/* Underbar */
+.book-underbar {
+  width: 100%;
+  border-radius: 18px;
+
+  background: linear-gradient(180deg, var(--paper), #f3ecdf);
+  padding: 12px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,0.06),
+    inset 0 10px 26px rgba(0,0,0,0.05);
+}
+
+.lang-pill {
+  border: 1px solid rgba(0,0,0,0.15);
+  background: rgba(255,255,255,0.86);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 10px 18px rgba(0,0,0,0.12);
+}
+
+.lang-pill:hover {
+  background: rgba(255,255,255,0.95);
+}
+
+/* ✅ anchored pagination: hidden host used to measure verse offsets */
+.paging-measure-host {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+  overflow: visible;
+  height: auto;
+}
+
+/* =========================
+   Mobile
+   ========================= */
 @media (max-width: 880px) {
   :root {
     --book-frame-pad: 10px;
     --book-gap: 10px;
     --book-underbar-h: 52px;
 
-    /* fix required on mobile */
     --book-spread-h: calc(100dvh - 200px);
     --book-total-h: calc(var(--book-spread-h) + var(--book-gap) + var(--book-underbar-h));
   }
@@ -357,61 +432,10 @@
   }
 }
 
-
-/* Make footer nice on small screens */
+/* Small screens */
 @media (max-width: 520px) {
   .book-footer {
     flex-direction: column;
     align-items: flex-start;
   }
-}
-
-.lang-pill {
-  border: 1px solid rgba(0,0,0,0.15);
-  background: rgba(255,255,255,0.75);
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.lang-pill:hover {
-  background: rgba(255,255,255,0.95);
-}
-
-/* =========================
-   Underbar (extra mini-page under spread)
-   ========================= */
-
-.book-underbar {
-  margin-top: 0; /* gap is controlled by .book-spread */
-  width: 100%;
-  border-radius: 18px;
-
-  background: linear-gradient(180deg, var(--paper), #f3ecdf);
-  padding: 12px;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  box-shadow:
-    inset 0 0 0 1px rgba(0,0,0,0.06),
-    inset 0 10px 26px rgba(0,0,0,0.05);
-}
-
-
-
-/* optional: make it feel like a small parchment strip */
-.book-underbar::before {
-  content: "";
-  position: absolute;
-  opacity: 0;
-}
-
-/* The pill already exists; just ensure it sits nicely */
-.book-underbar .lang-pill {
-  background: rgba(255,255,255,0.86);
-  border: 1px solid rgba(0,0,0,0.14);
-  box-shadow: 0 10px 18px rgba(0,0,0,0.12);
 }

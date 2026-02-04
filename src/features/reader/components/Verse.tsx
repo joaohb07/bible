@@ -5,9 +5,12 @@ export default function Verse(props: {
   text: string;
   highlighted: boolean;
   onToggleHighlight: () => void;
+  dataIndex?: number;
 }) {
   return (
     <div
+      data-verse={props.refObj.verse}
+      data-verse-idx={props.dataIndex}
       onClick={props.onToggleHighlight}
       className={`verse-line ${props.highlighted ? "is-highlighted" : ""}`}
       role="button"
