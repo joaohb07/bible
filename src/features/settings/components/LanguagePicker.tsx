@@ -1,33 +1,24 @@
-import { useNavigate } from "react-router-dom";
 import type { TranslationId } from "../../../shared/bible/refs";
 import { TRANSLATIONS } from "../../../shared/bible/translations";
 
 export default function LanguagePicker(props: {
-  translation: TranslationId;
-  bookId: string;
-  chapter: number;
-  onDone?: () => void;
+  value: TranslationId;
+  onSelect: (id: TranslationId) => void;
 }) {
-  const nav = useNavigate();
-
-  function setTranslation(next: TranslationId) {
-    nav(`/read/${next}/${props.bookId}/${props.chapter}`);
-    props.onDone?.();
-  }
-
   return (
     <div className="lang-picker">
-      {TRANSLATIONS.map((t) => {
-        const active = t.id === props.translation;
+      {TRANSLATIONS.map((tr) => {
+        const active = tr.id === props.value;
 
         return (
           <button
-            key={t.id}
+            key={tr.id}
             className={`lang-btn ${active ? "active" : ""}`}
-            onClick={() => setTranslation(t.id)}
+            onClick={() => props.onSelect(tr.id)}
             aria-pressed={active}
+            type="button"
           >
-            {t.label}
+            {tr.label}
           </button>
         );
       })}

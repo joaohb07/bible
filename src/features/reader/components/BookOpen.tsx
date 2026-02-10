@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import type { BookId, TranslationId } from "../../../shared/bible/refs";
 import { getBookById, BIBLE_BOOKS } from "../../../shared/bible/books";
+import { t } from "../../../shared/i18n/ui";
 import LanguagePicker from "../../settings/components/LanguagePicker";
 import BottomSheet from "../../../shared/ui/BottomSheet";
 import { useChapter } from "../hooks/useChapter";
@@ -43,7 +44,6 @@ function nextChapterRef(bookId: string, chapter: number) {
   const nb = BIBLE_BOOKS[bi + 1];
   if (nb) return { book: nb.id, chapter: 1 };
 
-  // se estiver no último livro, mantém (ou volta pro primeiro — mas vamos manter)
   return { book: b.id, chapter: b.chapters };
 }
 
@@ -198,7 +198,7 @@ export default function BookOpen(props: {
   // 🔒 evita loop URL->state->URL
   const syncingRef = useRef(false);
 
-  // 1) URL / localStorage -> state (sempre que mudar chapter/layout OU o próprio ?p=)
+  // 1) URL / localStorage -> state
   useEffect(() => {
     const max = Math.max(0, (pages?.length ?? 1) - 1);
 
@@ -221,7 +221,7 @@ export default function BookOpen(props: {
     setPageIndex(clampInt(next, 0, max));
   }, [sp, lastPageKey, pages]);
 
-  // 2) state -> URL + localStorage (somente quando não veio de sync)
+  // 2) state -> URL + localStorage
   useEffect(() => {
     const max = Math.max(0, (pages?.length ?? 1) - 1);
     const clamped = clampInt(pageIndex, 0, max);
@@ -233,7 +233,6 @@ export default function BookOpen(props: {
 
     lsSet(lastPageKey, String(clamped));
 
-    // se acabamos de ler da URL/storage, não reescreve agora
     if (syncingRef.current) {
       syncingRef.current = false;
       return;
@@ -270,7 +269,6 @@ export default function BookOpen(props: {
       return;
     }
 
-    // acabou o capítulo -> próximo capítulo/livro página 0/1
     const nxt = nextChapterRef(props.book, props.chapter);
     goTo(nxt.book, nxt.chapter, 0);
   }
@@ -284,7 +282,6 @@ export default function BookOpen(props: {
       return;
     }
 
-    // voltou antes do início -> capítulo/livro anterior na última página salva
     const prv = prevChapterRef(props.book, props.chapter);
     const last = getSavedLastPage({
       translation: props.translation,
@@ -296,8 +293,13 @@ export default function BookOpen(props: {
     goTo(prv.book, prv.chapter, last);
   }
 
-  if (res.loading) return <div className="glass">Loading…</div>;
-  if (res.error) return <div className="glass">Error: {res.error}</div>;
+  if (res.loading) return <div className="glass">{t(props.translation, "app.loading")}</div>;
+  if (res.error)
+    return (
+      <div className="glass">
+        {t(props.translation, "app.error", { msg: res.error })}
+      </div>
+    );
   if (!res.data) return null;
 
   return (
@@ -332,7 +334,12 @@ export default function BookOpen(props: {
         {/* Página esquerda */}
         <section className="page page-left page-col">
           <header className="page-header">
-            <button className="page-nav-btn" onClick={props.onOpenNav} title="Menu">
+            <button
+              className="page-nav-btn"
+              onClick={props.onOpenNav}
+              title={t(props.translation, "reader.menu")}
+              type="button"
+            >
               ☰
             </button>
 
@@ -340,7 +347,9 @@ export default function BookOpen(props: {
               <div>
                 <h2>{title}</h2>
                 <div className="page-sub">
-                  {pages ? `${totalPages} pages` : ""}
+                  {pages
+                    ? t(props.translation, "reader.totalPages", { total: totalPages })
+                    : ""}
                 </div>
               </div>
             </div>
@@ -349,7 +358,9 @@ export default function BookOpen(props: {
           <div ref={bodyRef} className="page-viewport">
             <div className="chapter-body chapter-body--paged">
               {!pages ? (
-                <div className="paging-loading">Calculando páginas…</div>
+                <div className="paging-loading">
+                  {t(props.translation, "reader.calculatingPages")}
+                </div>
               ) : pages[leftIndex] ? (
                 <VerseSliceView
                   translation={props.translation}
@@ -360,8 +371,11 @@ export default function BookOpen(props: {
               ) : null}
             </div>
           </div>
+
           <div className="page-sub">
-            {pages ? `Page ${pageIndex + 1}` : ""}
+            {pages
+              ? t(props.translation, "reader.pageSingle", { page: pageIndex + 1 })
+              : ""}
           </div>
         </section>
 
@@ -380,35 +394,49 @@ export default function BookOpen(props: {
                 <div className="chapter-body--unpaged" />
               )}
             </div>
+
             <div className="page-sub">
-              {pages ? `Page ${pageIndex + 2}` : ""}
+              {pages
+                ? t(props.translation, "reader.pageSingle", { page: pageIndex + 2 })
+                : ""}
             </div>
           </section>
         )}
-        
       </div>
 
       {/* underbar */}
       <div className="book-underbar">
-        <button className="lang-pill" onClick={onPrev} title="Anterior">
-          ‹ Previous
+        <button className="lang-pill" onClick={onPrev} title={t(props.translation, "reader.prev")} type="button">
+          {t(props.translation, "reader.prev")}
         </button>
 
-        <button className="lang-pill" onClick={() => setLangOpen(true)}>
-          Translation: {props.translation.toUpperCase()} ▴
+        <button className="lang-pill" onClick={() => setLangOpen(true)} type="button">
+          {t(props.translation, "reader.translationPill", {
+            id: props.translation.toUpperCase(),
+          })}
         </button>
 
-        <button className="lang-pill" onClick={onNext} title="Próximo">
-          Next ›
+        <button className="lang-pill" onClick={onNext} title={t(props.translation, "reader.next")} type="button">
+          {t(props.translation, "reader.next")}
         </button>
       </div>
 
-      <BottomSheet open={langOpen} onClose={() => setLangOpen(false)} title="Select translation">
+      <BottomSheet
+        open={langOpen}
+        onClose={() => setLangOpen(false)}
+        title={t(props.translation, "reader.selectTranslation")}
+      >
         <LanguagePicker
-          translation={props.translation}
-          bookId={props.book}
-          chapter={props.chapter}
-          onDone={() => setLangOpen(false)}
+          value={props.translation}
+          onSelect={(next) => {
+            // Opção A: remove ?p= ao trocar tradução
+            const qs = new URLSearchParams(window.location.search);
+            qs.delete("p");
+            const q = qs.toString();
+
+            nav(`/read/${next}/${props.book}/${props.chapter}${q ? `?${q}` : ""}`);
+            setLangOpen(false);
+          }}
         />
       </BottomSheet>
     </div>

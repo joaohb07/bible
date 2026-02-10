@@ -7,6 +7,7 @@ import {
   getBooksByTestament,
   type Testament,
 } from "../../../shared/bible/books";
+import { t } from "../../../shared/i18n/ui";
 import TestamentTabs from "./TestamentTabs";
 import BookList from "./BookList";
 import ChapterList from "./ChapterList";
@@ -32,6 +33,9 @@ export default function DrawerNav(props: {
   const books = useMemo(() => getBooksByTestament(testament), [testament]);
 
   const safeBookId = currentBook?.id ?? "genesis";
+  const safeBookName =
+    currentBook?.names?.[props.translation] ?? safeBookId;
+
   const safeChapters = currentBook?.chapters ?? 50;
 
   function go(nextBook: string, nextChapter: number) {
@@ -39,10 +43,20 @@ export default function DrawerNav(props: {
   }
 
   return (
-    <Drawer open={props.open} onClose={props.onClose} title="Navegação">
-      <TestamentTabs value={testament} onChange={setTestament} />
+    <Drawer
+      open={props.open}
+      onClose={props.onClose}
+      title={t(props.translation, "nav.title")}
+    >
+      <TestamentTabs
+        value={testament}
+        onChange={setTestament}
+        translation={props.translation}
+      />
 
-      <div className="nav-section-title">Livros</div>
+      <div className="nav-section-title">
+        {t(props.translation, "nav.books")}
+      </div>
       <BookList
         translation={props.translation}
         books={books}
@@ -50,7 +64,9 @@ export default function DrawerNav(props: {
         onSelect={(bookId) => go(bookId, 1)}
       />
 
-      <div className="nav-section-title">Capítulos - {safeBookId}</div>
+      <div className="nav-section-title">
+        {t(props.translation, "nav.chaptersFor", { book: safeBookName })}
+      </div>
       <ChapterList
         chapters={safeChapters}
         activeChapter={props.chapter}

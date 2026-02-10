@@ -126,4 +126,46 @@
   color: #fff;
 }
 
+/* =========================
+   Testament Tabs
+   ========================= */
+
+.testament-tabs {
+  display: flex;
+  gap: 10px;
+  margin: 8px 0 12px;
+}
+
+.testament-tab {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 12px;
+
+  border: 1px solid rgba(0,0,0,0.14);
+  background: rgba(255,255,255,0.75);
+  color: rgba(0,0,0,0.82);
+
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.testament-tab:hover {
+  background: rgba(255,255,255,0.92);
+}
+
+.testament-tab:active {
+  transform: translateY(1px);
+}
+
+.testament-tab.is-active {
+  background: rgba(17,17,17,0.92);
+  color: rgba(255,255,255,0.96);
+  border-color: rgba(17,17,17,0.92);
+}
+
+
 
