@@ -41,7 +41,7 @@ export default function DrawerNav(props: {
   return (
     <Drawer open={props.open} onClose={props.onClose} title="Navegação">
       <TestamentTabs value={testament} onChange={setTestament} />
-      
+
       <div className="nav-section-title">Livros</div>
       <BookList
         translation={props.translation}
@@ -58,5 +58,4 @@ export default function DrawerNav(props: {
       />
     </Drawer>
   );
-
-  }
+}

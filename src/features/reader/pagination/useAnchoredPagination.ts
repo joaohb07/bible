@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { VerseData } from "./types";
 
-type PagingCache = {
-  v: 1;
-  breaks: number[];
+type PagingCacheV2 = {
+  v: 2;
+  n: number; // quantidade de versos usada no cálculo
+  breaks: number[]; // [0, ..., n]
   pages: number;
 };
 
@@ -31,17 +32,38 @@ function lsSet(key: string, value: string) {
   }
 }
 
+function normalizeBreaks(breaks: number[], n: number) {
+  // garante: começa em 0, termina em n, estritamente crescente, no range [0..n]
+  const out: number[] = [];
+
+  for (const raw of breaks) {
+    const b = Math.max(0, Math.min(n, Math.floor(raw)));
+    if (out.length === 0) {
+      out.push(0);
+    }
+    if (b > out[out.length - 1]) out.push(b);
+  }
+
+  if (out.length === 0) out.push(0);
+  if (out[out.length - 1] !== n) out.push(n);
+
+  // se por algum motivo ficou só [0], vira [0,n]
+  if (out.length < 2) out.push(n);
+
+  return out;
+}
+
 function computeBreaksByOffsets(params: {
   tops: number[];
   bottoms: number[];
   pageHeight: number;
 }) {
   const { tops, bottoms, pageHeight } = params;
-
   const n = tops.length;
-  const breaks: number[] = [0];
 
+  const breaks: number[] = [0];
   let start = 0;
+
   while (start < n) {
     const limit = tops[start] + pageHeight;
 
@@ -55,12 +77,7 @@ function computeBreaksByOffsets(params: {
     start = i;
   }
 
-  // remove duplicados
-  const out: number[] = [];
-  for (const b of breaks) {
-    if (out.length === 0 || out[out.length - 1] !== b) out.push(b);
-  }
-  return out;
+  return normalizeBreaks(breaks, n);
 }
 
 function sliceByBreaks<T>(items: T[], breaks: number[]) {
@@ -68,6 +85,7 @@ function sliceByBreaks<T>(items: T[], breaks: number[]) {
   for (let i = 0; i < breaks.length - 1; i++) {
     const a = breaks[i];
     const b = breaks[i + 1];
+    // slices NÃO podem se sobrepor: [a,b)
     if (b > a) pages.push(items.slice(a, b));
   }
   return pages;
@@ -103,15 +121,20 @@ export function useAnchoredPagination(params: {
   const [breaks, setBreaks] = useState<number[] | null>(null);
   const [isComputing, setIsComputing] = useState(false);
 
-  // ✅ cache imediato
+  // ✅ cache imediato (somente se bate com n)
   useEffect(() => {
-    const cached = safeParse<PagingCache>(lsGet(cacheKey));
-    if (cached?.v === 1 && Array.isArray(cached.breaks) && cached.breaks.length >= 2) {
-      setBreaks(cached.breaks);
+    const cached = safeParse<PagingCacheV2>(lsGet(cacheKey));
+    if (
+      cached?.v === 2 &&
+      cached.n === verses.length &&
+      Array.isArray(cached.breaks) &&
+      cached.breaks.length >= 2
+    ) {
+      setBreaks(normalizeBreaks(cached.breaks, verses.length));
     } else {
       setBreaks(null);
     }
-  }, [cacheKey]);
+  }, [cacheKey, verses.length]);
 
   const tokenRef = useRef(0);
   const timerRef = useRef<number | null>(null);
@@ -143,30 +166,43 @@ export function useAnchoredPagination(params: {
         if (!host) return;
 
         const nodes = host.querySelectorAll<HTMLElement>("[data-verse-idx]");
-        const tops: number[] = [];
-        const bottoms: number[] = [];
+        const tops: number[] = new Array(verses.length);
+        const bottoms: number[] = new Array(verses.length);
+        const seen: boolean[] = new Array(verses.length).fill(false);
 
         nodes.forEach((el) => {
           const idxStr = el.getAttribute("data-verse-idx");
           if (idxStr == null) return;
           const idx = Number(idxStr);
           if (!Number.isFinite(idx)) return;
+          if (idx < 0 || idx >= verses.length) return;
 
           const top = el.offsetTop;
           const bottom = top + el.offsetHeight;
 
           tops[idx] = top;
           bottoms[idx] = bottom;
+          seen[idx] = true;
         });
 
-        // se por algum motivo faltou, cai pra 1 verso por página
-        if (tops.length !== verses.length || bottoms.length !== verses.length) {
-          const fallback: number[] = [0];
-          for (let i = 1; i <= verses.length; i++) fallback.push(i);
-          setBreaks(fallback);
+        // valida se todos índices foram medidos
+        const allMeasured = seen.every(Boolean);
+
+        if (!allMeasured) {
+          // fallback determinístico: 1 verso por página (sem overlap)
+          const fallback: number[] = [];
+          for (let i = 0; i <= verses.length; i++) fallback.push(i);
+
+          const norm = normalizeBreaks(fallback, verses.length);
+          setBreaks(norm);
           lsSet(
             cacheKey,
-            JSON.stringify({ v: 1, breaks: fallback, pages: fallback.length - 1 } satisfies PagingCache)
+            JSON.stringify({
+              v: 2,
+              n: verses.length,
+              breaks: norm,
+              pages: norm.length - 1,
+            } satisfies PagingCacheV2)
           );
           setIsComputing(false);
           return;
@@ -184,10 +220,11 @@ export function useAnchoredPagination(params: {
         lsSet(
           cacheKey,
           JSON.stringify({
-            v: 1,
+            v: 2,
+            n: verses.length,
             breaks: nextBreaks,
             pages: Math.max(0, nextBreaks.length - 1),
-          } satisfies PagingCache)
+          } satisfies PagingCacheV2)
         );
 
         setIsComputing(false);

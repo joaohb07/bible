@@ -247,6 +247,13 @@
   flex: 0 0 auto;
 }
 
+.page-header-text { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  gap: 12px; 
+}
+
 .page-nav-btn {
   width: 40px;
   height: 40px;
@@ -310,6 +317,10 @@
   margin-right: 0;
 }
 
+.chapter-body--unpaged {
+  opacity: 0.35;
+}
+
 /* pagination loading hint */
 .paging-loading {
   opacity: 0.6;
@@ -352,6 +363,7 @@
 .book-underbar {
   width: 100%;
   border-radius: 18px;
+  gap: 8px;
 
   background: linear-gradient(180deg, var(--paper), #f3ecdf);
   padding: 12px;
