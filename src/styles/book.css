@@ -247,19 +247,44 @@
   flex: 0 0 auto;
 }
 
-.page-header-text { 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  gap: 12px; 
+/* This MUST occupy the full available width so the close button can go to the far right */
+.page-header-text {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Title + block */
+.page-header-center {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Close button goes to the far right of the left page */
+.page-close-btn {
+  margin-left: auto;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.65);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.page-close-btn:hover {
+  background: rgba(255,255,255,0.85);
 }
 
 .page-nav-btn {
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
   border-radius: 12px;
   border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.70);
+  background: rgba(255,255,255,0.50);
   cursor: pointer;
   display: grid;
   place-items: center;
@@ -379,7 +404,7 @@
 
 .lang-pill {
   border: 1px solid rgba(0,0,0,0.15);
-  background: rgba(255,255,255,0.86);
+  background: rgba(255,255,255,0.50);
   border-radius: 999px;
   padding: 6px 14px;
   font-size: 13px;

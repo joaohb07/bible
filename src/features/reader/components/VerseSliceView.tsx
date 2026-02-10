@@ -1,9 +1,6 @@
-import type { TranslationId, BookId } from "../../../shared/bible/refs";
-import type { ChapterData } from "../types";
+import type { BookId, TranslationId } from "../../../shared/bible/refs";
+import type { VerseData } from "../pagination/types";
 import Verse from "./Verse";
-import { useHighlights } from "../../highlights/hooks/useHighlights";
-
-type VerseData = ChapterData["verses"][number];
 
 export default function VerseSliceView(props: {
   translation: TranslationId;
@@ -11,28 +8,21 @@ export default function VerseSliceView(props: {
   chapter: number;
   verses: VerseData[];
 }) {
-  const h = useHighlights();
-
   return (
-    <>
-      {props.verses.map((v) => {
-        const refObj = {
-          translation: props.translation,
-          book: props.book,
-          chapter: props.chapter,
-          verse: v.verse,
-        };
-
-        return (
-          <Verse
-            key={v.verse}
-            refObj={refObj}
-            text={v.text}
-            highlighted={h.isHighlighted(refObj)}
-            onToggleHighlight={() => h.toggle(refObj)}
-          />
-        );
-      })}
-    </>
+    <div className="verse-slice">
+      {props.verses.map((v) => (
+        <Verse
+          key={v.verse}
+          refObj={{
+            translation: props.translation,
+            book: props.book,
+            chapter: props.chapter,
+            verse: v.verse,
+          }}
+          text={v.text}
+        />
+      ))}
+    </div>
   );
 }
+

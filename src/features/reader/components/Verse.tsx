@@ -3,22 +3,13 @@ import type { VerseRef } from "../../../shared/bible/refs";
 export default function Verse(props: {
   refObj: VerseRef;
   text: string;
-  highlighted: boolean;
-  onToggleHighlight: () => void;
   dataIndex?: number;
 }) {
   return (
     <div
       data-verse={props.refObj.verse}
       data-verse-idx={props.dataIndex}
-      onClick={props.onToggleHighlight}
-      className={`verse-line ${props.highlighted ? "is-highlighted" : ""}`}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") props.onToggleHighlight();
-      }}
-      aria-pressed={props.highlighted}
+      className="verse-line"
     >
       <div className="verse-num">{props.refObj.verse}</div>
       <div className="verse-text">{props.text}</div>

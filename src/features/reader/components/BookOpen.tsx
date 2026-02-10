@@ -212,7 +212,6 @@ export default function BookOpen(props: {
       return;
     }
 
-    // sem p na URL: tenta lastPage
     const saved = lsGet(lastPageKey);
     const pSaved = saved != null ? Number(saved) : NaN;
 
@@ -257,7 +256,6 @@ export default function BookOpen(props: {
     nav(`/read/${props.translation}/${book}/${chapter}${q ? `?${q}` : ""}`);
   }
 
-  // ✅ turn de página: no desktop, vira o spread (2 páginas)
   const step = isMobile ? 1 : 2;
 
   function onNext() {
@@ -323,8 +321,6 @@ export default function BookOpen(props: {
               verse: v.verse,
             }}
             text={v.text}
-            highlighted={false}
-            onToggleHighlight={() => {}}
             dataIndex={idx}
           />
         ))}
@@ -344,7 +340,7 @@ export default function BookOpen(props: {
             </button>
 
             <div className="page-header-text">
-              <div>
+              <div className="page-header-center">
                 <h2>{title}</h2>
                 <div className="page-sub">
                   {pages
@@ -352,6 +348,15 @@ export default function BookOpen(props: {
                     : ""}
                 </div>
               </div>
+
+              <button
+                type="button"
+                className="page-close-btn"
+                onClick={() => nav("/")}
+                title={t(props.translation, "reader.closeBook")}
+              >
+                {t(props.translation, "reader.closeBook")}
+              </button>
             </div>
           </header>
 
@@ -373,9 +378,7 @@ export default function BookOpen(props: {
           </div>
 
           <div className="page-sub">
-            {pages
-              ? t(props.translation, "reader.pageSingle", { page: pageIndex + 1 })
-              : ""}
+            {pages ? t(props.translation, "reader.pageSingle", { page: pageIndex + 1 }) : ""}
           </div>
         </section>
 
@@ -396,9 +399,7 @@ export default function BookOpen(props: {
             </div>
 
             <div className="page-sub">
-              {pages
-                ? t(props.translation, "reader.pageSingle", { page: pageIndex + 2 })
-                : ""}
+              {pages ? t(props.translation, "reader.pageSingle", { page: pageIndex + 2 }) : ""}
             </div>
           </section>
         )}
@@ -406,7 +407,12 @@ export default function BookOpen(props: {
 
       {/* underbar */}
       <div className="book-underbar">
-        <button className="lang-pill" onClick={onPrev} title={t(props.translation, "reader.prev")} type="button">
+        <button
+          className="lang-pill"
+          onClick={onPrev}
+          title={t(props.translation, "reader.prev")}
+          type="button"
+        >
           {t(props.translation, "reader.prev")}
         </button>
 
@@ -416,7 +422,12 @@ export default function BookOpen(props: {
           })}
         </button>
 
-        <button className="lang-pill" onClick={onNext} title={t(props.translation, "reader.next")} type="button">
+        <button
+          className="lang-pill"
+          onClick={onNext}
+          title={t(props.translation, "reader.next")}
+          type="button"
+        >
           {t(props.translation, "reader.next")}
         </button>
       </div>
@@ -429,9 +440,8 @@ export default function BookOpen(props: {
         <LanguagePicker
           value={props.translation}
           onSelect={(next) => {
-            // Opção A: remove ?p= ao trocar tradução
             const qs = new URLSearchParams(window.location.search);
-            qs.delete("p");
+            qs.delete("p"); // evita carregar página inválida na nova tradução
             const q = qs.toString();
 
             nav(`/read/${next}/${props.book}/${props.chapter}${q ? `?${q}` : ""}`);

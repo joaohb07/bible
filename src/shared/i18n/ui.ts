@@ -11,6 +11,7 @@ export type UiKey =
   | "reader.next"
   | "reader.totalPages"
   | "reader.pageSingle"
+  | "reader.closeBook"
   | "nav.title"
   | "nav.oldTestament"
   | "nav.newTestament"
@@ -36,6 +37,7 @@ const UI: Record<TranslationId, Dict> = {
     "reader.next": "Próximo ›",
     "reader.totalPages": "{total} páginas",
     "reader.pageSingle": "Página {page}",
+    "reader.closeBook": "Fechar Bíblia",
 
     "nav.title": "Navegação",
     "nav.oldTestament": "Antigo Testamento",
@@ -61,6 +63,7 @@ const UI: Record<TranslationId, Dict> = {
     "reader.next": "Next ›",
     "reader.totalPages": "{total} pages",
     "reader.pageSingle": "Page {page}",
+    "reader.closeBook": "Close Bible",
 
     "nav.title": "Navigation",
     "nav.oldTestament": "Old Testament",
@@ -86,6 +89,7 @@ const UI: Record<TranslationId, Dict> = {
     "reader.next": "Proxima ›",
     "reader.totalPages": "{total} paginae",
     "reader.pageSingle": "Pagina {page}",
+    "reader.closeBook": "Claude Bibliam",
 
     "nav.title": "Navigatio",
     "nav.oldTestament": "Vetus Testamentum",
