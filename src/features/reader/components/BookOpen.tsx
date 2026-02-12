@@ -258,6 +258,25 @@ export default function BookOpen(props: {
 
   const step = isMobile ? 1 : 2;
 
+  const firstBookId = BIBLE_BOOKS[0]?.id;
+  const lastBook = BIBLE_BOOKS[BIBLE_BOOKS.length - 1];
+
+  const isAtBibleStart =
+    props.book === firstBookId &&
+    props.chapter === 1 &&
+    pageIndex === 0;
+
+  // "última página" considerando step (mobile 1 / desktop 2)
+  const isAtLastPageOfChapter =
+    totalPages > 0 && (pageIndex + step > totalPages - 1);
+
+  const isAtBibleEnd =
+    !!lastBook &&
+    props.book === lastBook.id &&
+    props.chapter === lastBook.chapters &&
+    isAtLastPageOfChapter;
+
+
   function onNext() {
     if (!pages || totalPages <= 0) return;
 
@@ -407,14 +426,17 @@ export default function BookOpen(props: {
 
       {/* underbar */}
       <div className="book-underbar">
-        <button
-          className="lang-pill"
-          onClick={onPrev}
-          title={t(props.translation, "reader.prev")}
-          type="button"
-        >
-          {t(props.translation, "reader.prev")}
-        </button>
+        {!isAtBibleStart && (
+          <button
+            className="lang-pill"
+            onClick={onPrev}
+            title={t(props.translation, "reader.prev")}
+            type="button"
+          >
+            {t(props.translation, "reader.prev")}
+          </button>
+        )}
+
 
         <button className="lang-pill" onClick={() => setLangOpen(true)} type="button">
           {t(props.translation, "reader.translationPill", {
@@ -422,14 +444,17 @@ export default function BookOpen(props: {
           })}
         </button>
 
-        <button
-          className="lang-pill"
-          onClick={onNext}
-          title={t(props.translation, "reader.next")}
-          type="button"
-        >
-          {t(props.translation, "reader.next")}
-        </button>
+        {!isAtBibleEnd && (
+          <button
+            className="lang-pill"
+            onClick={onNext}
+            title={t(props.translation, "reader.next")}
+            type="button"
+          >
+            {t(props.translation, "reader.next")}
+          </button>
+        )}
+
       </div>
 
       <BottomSheet
