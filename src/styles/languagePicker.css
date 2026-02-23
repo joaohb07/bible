@@ -24,3 +24,20 @@
   color: #fff;
   border-color: #111;
 }
+
+.theme-dark .lang-btn {
+  background: rgba(18,18,18,0.92);
+  color: rgba(255,255,255,0.90);
+  border-color: rgba(255,255,255,0.18);
+}
+
+.theme-dark .lang-btn:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.theme-dark .lang-btn.active {
+  background: rgba(255,255,255,0.92);
+  color: rgba(0,0,0,0.90);
+  border-color: rgba(255,255,255,0.92);
+}
+

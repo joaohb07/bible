@@ -167,5 +167,68 @@
   border-color: rgba(17,17,17,0.92);
 }
 
+/* Dark mode overrides for nav drawer content */
+.theme-dark .nav-card {
+  background: linear-gradient(180deg, #121212, #0f0f0f);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.08),
+    0 16px 40px rgba(0,0,0,0.35);
+}
+
+.theme-dark .nav-title {
+  color: rgba(255,255,255,0.92);
+}
+
+.theme-dark .nav-section-title {
+  color: rgba(255,255,255,0.60);
+}
+
+.theme-dark .nav-close-btn {
+  border-color: rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.90);
+}
+
+.theme-dark .nav-close-btn:hover {
+  background: rgba(255,255,255,0.16);
+}
+
+.theme-dark .nav-item {
+  border-color: rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.88);
+}
+
+.theme-dark .nav-item.is-active {
+  background: rgba(255,255,255,0.12);
+}
+
+.theme-dark .nav-chip {
+  border-color: rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.88);
+}
+
+.theme-dark .nav-chip.is-active {
+  background: rgba(255,255,255,0.92);
+  color: rgba(0,0,0,0.90);
+}
+
+/* Testament tabs */
+.theme-dark .testament-tab {
+  border-color: rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.88);
+}
+
+.theme-dark .testament-tab:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+.theme-dark .testament-tab.is-active {
+  background: rgba(255,255,255,0.92);
+  color: rgba(0,0,0,0.90);
+  border-color: rgba(255,255,255,0.92);
+}
 
 

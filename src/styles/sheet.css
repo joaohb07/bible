@@ -53,3 +53,23 @@
   display: flex;
   justify-content: center;
 }
+
+/* Dark mode - BottomSheet */
+.theme-dark .sheet {
+  background: linear-gradient(180deg, #121212, #0f0f0f);
+  color: rgba(255,255,255,0.90);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.theme-dark .sheet-title {
+  color: rgba(255,255,255,0.92);
+}
+
+.theme-dark .sheet-handle {
+  background: rgba(255,255,255,0.20);
+}
+
+.theme-dark .sheet-overlay {
+  background: rgba(0,0,0,0.6);
+}
+

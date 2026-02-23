@@ -21,7 +21,9 @@ export type UiKey =
   | "cover.clickToBegin"
   | "cover.openAria"
   | "cover.languagePill"
-  | "cover.selectLanguage";
+  | "cover.selectLanguage"
+  | "reader.themeLight"
+  | "reader.themeDark";
 
 type Dict = Record<UiKey, string>;
 
@@ -38,6 +40,9 @@ const UI: Record<TranslationId, Dict> = {
     "reader.totalPages": "{total} páginas",
     "reader.pageSingle": "Página {page}",
     "reader.closeBook": "Fechar Bíblia",
+    "reader.themeLight": "Modo claro",
+    "reader.themeDark": "Modo escuro",
+
 
     "nav.title": "Navegação",
     "nav.oldTestament": "Antigo Testamento",
@@ -64,6 +69,9 @@ const UI: Record<TranslationId, Dict> = {
     "reader.totalPages": "{total} pages",
     "reader.pageSingle": "Page {page}",
     "reader.closeBook": "Close Bible",
+    "reader.themeLight": "Light mode",
+    "reader.themeDark": "Dark mode",
+
 
     "nav.title": "Navigation",
     "nav.oldTestament": "Old Testament",
@@ -90,6 +98,9 @@ const UI: Record<TranslationId, Dict> = {
     "reader.totalPages": "{total} paginae",
     "reader.pageSingle": "Pagina {page}",
     "reader.closeBook": "Claude Bibliam",
+    "reader.themeLight": "Modus clarus",
+    "reader.themeDark": "Modus obscurus",
+
 
     "nav.title": "Navigatio",
     "nav.oldTestament": "Vetus Testamentum",

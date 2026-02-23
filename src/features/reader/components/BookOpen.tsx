@@ -25,6 +25,15 @@ function lsSet(key: string, value: string) {
   }
 }
 
+type ThemeMode = "light" | "dark";
+const THEME_KEY = "bible:theme";
+
+function getTheme(): ThemeMode {
+  const v = lsGet(THEME_KEY);
+  return v === "dark" ? "dark" : "light";
+}
+
+
 function clampInt(n: number, min: number, max: number) {
   if (!Number.isFinite(n)) return min;
   return Math.min(Math.max(Math.floor(n), min), max);
@@ -198,6 +207,15 @@ export default function BookOpen(props: {
   // 🔒 evita loop URL->state->URL
   const syncingRef = useRef(false);
 
+  const [theme, setTheme] = useState<ThemeMode>(() => getTheme());
+
+  useEffect(() => {
+    document.body.classList.toggle("theme-dark", theme === "dark");
+    return () => document.body.classList.remove("theme-dark");
+  }, [theme]);
+
+
+
   // 1) URL / localStorage -> state
   useEffect(() => {
     const max = Math.max(0, (pages?.length ?? 1) - 1);
@@ -320,7 +338,7 @@ export default function BookOpen(props: {
   if (!res.data) return null;
 
   return (
-    <div className="book-spread">
+    <div className={`book-spread${theme === "dark" ? " theme-dark" : ""}`}>
       <div className="book-gutter" />
 
       {/* Host invisível: mede com o MESMO layout do paginado */}
@@ -426,6 +444,15 @@ export default function BookOpen(props: {
 
       {/* underbar */}
       <div className="book-underbar">
+        <button
+          className="lang-pill"
+          onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+          title={t(props.translation, theme === "dark" ? "reader.themeDark" : "reader.themeLight")}
+          aria-label={t(props.translation, theme === "dark" ? "reader.themeDark" : "reader.themeLight")}
+          type="button"
+        >
+          {theme === "dark" ? "💡 Off" : "💡 On"}
+        </button>
         {!isAtBibleStart && (
           <button
             className="lang-pill"

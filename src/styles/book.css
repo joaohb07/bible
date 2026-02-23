@@ -504,3 +504,56 @@
     align-items: flex-start;
   }
 }
+
+/* =========================
+   Dark theme
+   ========================= */
+.book-spread.theme-dark {
+  --paper: #121212;
+  --paper-edge: #1b1b1b;
+  --ink: rgba(255,255,255,0.88);
+}
+
+/* Page backgrounds (porque hoje tem #f3ecdf hardcoded) */
+.book-spread.theme-dark .page,
+.book-spread.theme-dark .page-left,
+.book-spread.theme-dark .page-right,
+.book-spread.theme-dark .book-underbar {
+  background: linear-gradient(180deg, var(--paper), #0f0f0f);
+  color: var(--ink);
+}
+
+/* Subtext + verse tones */
+.book-spread.theme-dark .page-sub {
+  color: rgba(255,255,255,0.60);
+}
+
+.book-spread.theme-dark .verse-num {
+  color: rgba(255,255,255,0.55);
+}
+
+.book-spread.theme-dark .verse-text {
+  color: rgba(255,255,255,0.88);
+}
+
+/* 1) Remove sombras escuras perto do meio (page-left/right) */
+.book-spread.theme-dark .page-left {
+  background:
+    radial-gradient(500px 320px at 88% 42%, rgba(255,255,255,0.06), transparent 60%),
+    linear-gradient(180deg, var(--paper), #0f0f0f);
+}
+
+.book-spread.theme-dark .page-right {
+  background:
+    radial-gradient(520px 340px at 12% 42%, rgba(255,255,255,0.06), transparent 60%),
+    linear-gradient(180deg, var(--paper), #0f0f0f);
+}
+
+/* 2) Troca o overlay interno da página pra “claro” em vez de preto */
+.book-spread.theme-dark .page::after {
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.06),
+    inset 0 10px 30px rgba(255,255,255,0.03);
+}
+
+
