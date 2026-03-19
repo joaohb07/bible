@@ -1,99 +1,40 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+// React primitives for component state, memoized derived values, and effectful sync with the browser.
+import { useEffect, useRef, useState } from "react";
+
+// Router utilities to navigate programmatically and keep the current page index in the URL query string.
 import { useNavigate, useSearchParams } from "react-router-dom";
+
+// Domain types that identify a Bible book and a translation.
 import type { BookId, TranslationId } from "../../../shared/bible/refs";
-import { getBookById, BIBLE_BOOKS } from "../../../shared/bible/books";
+
+// i18n helper for translating UI labels based on the current translation/language.
 import { t } from "../../../shared/i18n/ui";
-import LanguagePicker from "../../settings/components/LanguagePicker";
-import BottomSheet from "../../../shared/ui/BottomSheet";
+
+// Data loader for the current chapter (verses, loading and error states), plus hooks for pagination and page index synchronization.
 import { useChapter } from "../hooks/useChapter";
+import { usePageIndexSync } from "../hooks/usePageIndexSync";
+import { useReaderNavigation } from "../hooks/useReaderNavigation";
+import { useReaderLayout } from "../hooks/useReaderLayout";
+
+// Pagination engine that computes deterministic page slices using anchored offsets.
 import { useAnchoredPagination } from "../pagination/useAnchoredPagination";
-import Verse from "./Verse";
-import VerseSliceView from "./VerseSliceView";
 
-function lsGet(key: string) {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-function lsSet(key: string, value: string) {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    // ignore
-  }
-}
+// Presentational components for rendering a single verse and a slice of verses (one page).
+import ReaderMeasureHost from "./ReaderMeasureHost";
+import ReaderUnderbar from "./ReaderUnderbar";
+import ReaderHeader from "./ReaderHeader";
+import ReaderPageColumn from "./ReaderPageColumn";
+import ReaderLanguageSheet from "./ReaderLanguageSheet";
 
-type ThemeMode = "light" | "dark";
-const THEME_KEY = "bible:theme";
+// Shared hooks for viewport/layout behavior and theme handling.
+import { useMediaQuery } from "../../../shared/hooks/useMediaQuery";
+import { useElementSize } from "../../../shared/hooks/useElementSize";
+import { useTheme } from "../../../shared/hooks/useTheme";
 
-function getTheme(): ThemeMode {
-  const v = lsGet(THEME_KEY);
-  return v === "dark" ? "dark" : "light";
-}
+// Util for persisting the last read position (book/chapter) to localStorage, enabling "resume reading" behavior on the home screen.
+import { saveLastRead } from "../../../shared/utils/lastRead";
+import { readStorage, writeStorage } from "../../../shared/utils/storage";
 
-
-function clampInt(n: number, min: number, max: number) {
-  if (!Number.isFinite(n)) return min;
-  return Math.min(Math.max(Math.floor(n), min), max);
-}
-
-function bookIndex(bookId: string) {
-  return BIBLE_BOOKS.findIndex((b) => b.id === bookId);
-}
-
-function nextChapterRef(bookId: string, chapter: number) {
-  const bi = bookIndex(bookId);
-  const b = bi >= 0 ? BIBLE_BOOKS[bi] : null;
-  if (!b) return { book: "genesis", chapter: 1 };
-
-  if (chapter < b.chapters) return { book: b.id, chapter: chapter + 1 };
-
-  const nb = BIBLE_BOOKS[bi + 1];
-  if (nb) return { book: nb.id, chapter: 1 };
-
-  return { book: b.id, chapter: b.chapters };
-}
-
-function prevChapterRef(bookId: string, chapter: number) {
-  const bi = bookIndex(bookId);
-  const b = bi >= 0 ? BIBLE_BOOKS[bi] : null;
-  if (!b) return { book: "genesis", chapter: 1 };
-
-  if (chapter > 1) return { book: b.id, chapter: chapter - 1 };
-
-  const pb = BIBLE_BOOKS[bi - 1];
-  if (pb) return { book: pb.id, chapter: pb.chapters };
-
-  return { book: b.id, chapter: 1 };
-}
-
-function getSavedLastPage(params: {
-  translation: TranslationId;
-  book: string;
-  chapter: number;
-  layoutKey: string;
-}) {
-  const chapterKey = `${params.translation}:${params.book}:${params.chapter}`;
-  const lastKey = `bible:lastPage:${chapterKey}:${params.layoutKey}`;
-  const saved = lsGet(lastKey);
-  const pSaved = saved != null ? Number(saved) : NaN;
-  if (Number.isFinite(pSaved) && pSaved >= 0) return Math.floor(pSaved);
-
-  // fallback: se tiver paging cache com pages, usa última
-  const pagingKey = `bible:paging:${chapterKey}:${params.layoutKey}`;
-  const raw = lsGet(pagingKey);
-  try {
-    const obj = raw ? JSON.parse(raw) : null;
-    const pages = obj?.pages;
-    if (Number.isFinite(pages) && pages > 0) return Math.max(0, Math.floor(pages) - 1);
-  } catch {
-    // ignore
-  }
-
-  return 0;
-}
 
 export default function BookOpen(props: {
   translation: TranslationId;
@@ -101,406 +42,227 @@ export default function BookOpen(props: {
   chapter: number;
   onOpenNav: () => void;
 }) {
+  // Router navigation for closing the reader and switching chapters/books/translations.
   const nav = useNavigate();
+
+  // Chapter loader: provides verses plus loading/error states.
   const res = useChapter(props);
+
+  // Controls the translation picker bottom sheet.
   const [langOpen, setLangOpen] = useState(false);
 
-  // URL: ?p=
+  // Query string state used to store the current page index (`?p=`).
   const [sp, setSp] = useSearchParams();
 
-  // Detect mobile
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 880px)");
-    const apply = () => setIsMobile(mq.matches);
-    apply();
+  // Responsive breakpoint: mobile uses 1 page; desktop uses a 2-page spread.
+  const isMobile = useMediaQuery("(max-width: 880px)");
 
-    if (mq.addEventListener) {
-      mq.addEventListener("change", apply);
-      return () => mq.removeEventListener("change", apply);
-    }
+  // Theme state and toggle behavior (also applies `.theme-dark` on <body> via the hook).
+  const { theme, toggle: toggleTheme } = useTheme();
 
-    // compat
-    // @ts-ignore
-    mq.addListener(apply);
-    // @ts-ignore
-    return () => mq.removeListener(apply);
-  }, []);
+  // Handler for closing the reader and returning to the home screen.
+  function onCloseReader() {
+    nav("/");
+  }
 
-  const title = useMemo(() => {
-    const b = getBookById(props.book);
-    const name = b?.names[props.translation] ?? props.book;
-    return `${name} ${props.chapter}`;
-  }, [props.translation, props.book, props.chapter]);
+  // Opens the language selection bottom sheet.
+  function onOpenLanguagePicker() {
+    setLangOpen(true);
+  }
 
-  // medir viewport real da página
-  const bodyRef = useRef<HTMLDivElement | null>(null);
-  const [dims, setDims] = useState({ w: 0, h: 0 });
+  // Closes the language selection bottom sheet.
+  function onCloseLanguagePicker() {
+    setLangOpen(false);
+  }
 
-  useEffect(() => {
-    const el = bodyRef.current;
-    if (!el) return;
+  // Centralized navigation helper for child components and hooks.
+  function navigateTo(path: string) {
+    nav(path);
+  }
 
-    let raf = 0;
-    let stopped = false;
+  /**
+   * Measures the real viewport area used to render the page content.
+   * Pagination needs an accurate height to compute stable breaks.
+   */
+  const { ref: bodyRef, width, height } = useElementSize<HTMLDivElement>();
 
-    const commit = (w: number, h: number) => {
-      const nw = Math.max(0, Math.floor(w));
-      const nh = Math.max(0, Math.floor(h));
-      setDims((prev) => (prev.w === nw && prev.h === nh ? prev : { w: nw, h: nh }));
-    };
+  /**
+   * Computes the layout configuration for the reader based on the current props and viewport.
+   */
+  const { title, chapterKey, layoutKey, lastPageKey } = useReaderLayout({
+    translation: props.translation,
+    book: props.book,
+    chapter: props.chapter,
+    isMobile,
+    width,
+  });
 
-    const ro = new ResizeObserver((entries) => {
-      const cr = entries[0]?.contentRect;
-      if (!cr) return;
-      commit(cr.width, cr.height);
-    });
-
-    ro.observe(el);
-
-    raf = requestAnimationFrame(() => {
-      if (stopped) return;
-      const r = el.getBoundingClientRect();
-      commit(r.width, r.height);
-    });
-
-    return () => {
-      stopped = true;
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-    };
-  }, [res.data, isMobile]);
-
-  const chapterKey = `${props.translation}:${props.book}:${props.chapter}`;
-
-  const layoutKey = useMemo(() => {
-    const fontScale = 1;
-    const lineHeight = 1.4;
-    return `${isMobile ? 1 : 0}|${dims.w}|${fontScale}|${lineHeight}`;
-  }, [isMobile, dims.w]);
-
-  const lastPageKey = useMemo(
-    () => `bible:lastPage:${chapterKey}:${layoutKey}`,
-    [chapterKey, layoutKey]
-  );
-
+  // The actual verse list for this chapter (empty while loading).
   const verses = res.data?.verses ?? [];
-  const paginationEnabled = !!res.data && dims.w > 0 && dims.h > 0;
 
-  // host invisível que renderiza todos os versos (pra coletar offsets)
+  /**
+   * Pagination should only run once we have:
+   * - chapter data loaded
+   * - a valid measured viewport size
+   */
+  const paginationEnabled = !!res.data && width > 0 && height > 0;
+
+  /**
+   * Invisible measurement host:
+   * We render the full chapter here using the same typography/layout classes,
+   * allowing `useAnchoredPagination` to compute stable offsets per verse.
+   */
   const measureHostRef = useRef<HTMLDivElement | null>(null);
 
+  /**
+   * Deterministic page slices computed by anchored pagination.
+   * - `pages` is the final array of verse slices per page (preferred).
+   * - `breaks` is a lower-level representation used as a fallback for total page count.
+   */
   const { pages, breaks } = useAnchoredPagination({
     verses,
     enabled: paginationEnabled,
-    pageHeightPx: dims.h,
+    pageHeightPx: height,
     chapterKey,
     layoutKey,
     hostRef: measureHostRef,
   });
 
+  /**
+   * Total pages in the current chapter for the current layout.
+   * Prefer `pages.length` when available; otherwise derive from `breaks`.
+   */
   const totalPages = pages?.length ?? (breaks ? Math.max(0, breaks.length - 1) : 0);
 
-  // estado da página (controlado por URL + fallback localStorage)
-  const [pageIndex, setPageIndex] = useState(0);
+  // Synchronize the current page index across URL query params and localStorage.
+  const { pageIndex, setPageIndex } = usePageIndexSync({
+    searchParams: sp,
+    setSearchParams: setSp,
+    lastPageKey,
+    pagesLength: pages?.length,
+    readStorage,
+    writeStorage,
+  });
 
-  // 🔒 evita loop URL->state->URL
-  const syncingRef = useRef(false);
-
-  const [theme, setTheme] = useState<ThemeMode>(() => getTheme());
-
+  /**
+   * Persist the global reading position (book/chapter) so the app can resume
+   * from the cover/home screen.
+   */
   useEffect(() => {
-    document.body.classList.toggle("theme-dark", theme === "dark");
-    return () => document.body.classList.remove("theme-dark");
-  }, [theme]);
+    saveLastRead({ book: props.book, chapter: props.chapter });
+  }, [props.book, props.chapter]);
 
-
-
-  // 1) URL / localStorage -> state
-  useEffect(() => {
-    const max = Math.max(0, (pages?.length ?? 1) - 1);
-
-    const pRaw = sp.get("p");
-    const pUrl = pRaw != null ? Number(pRaw) : NaN;
-
-    if (Number.isFinite(pUrl) && pUrl >= 0) {
-      const clamped = clampInt(pUrl, 0, max);
-      syncingRef.current = true;
-      setPageIndex(clamped);
-      return;
-    }
-
-    const saved = lsGet(lastPageKey);
-    const pSaved = saved != null ? Number(saved) : NaN;
-
-    const next = Number.isFinite(pSaved) && pSaved >= 0 ? Math.floor(pSaved) : 0;
-    syncingRef.current = true;
-    setPageIndex(clampInt(next, 0, max));
-  }, [sp, lastPageKey, pages]);
-
-  // 2) state -> URL + localStorage
-  useEffect(() => {
-    const max = Math.max(0, (pages?.length ?? 1) - 1);
-    const clamped = clampInt(pageIndex, 0, max);
-
-    if (clamped !== pageIndex) {
-      setPageIndex(clamped);
-      return;
-    }
-
-    lsSet(lastPageKey, String(clamped));
-
-    if (syncingRef.current) {
-      syncingRef.current = false;
-      return;
-    }
-
-    const currentP = sp.get("p");
-    if (currentP === String(clamped)) return;
-
-    const next = new URLSearchParams(sp);
-    next.set("p", String(clamped));
-    setSp(next, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageIndex, lastPageKey, pages]);
-
+  // Page indexes for the current visible spread.
   const leftIndex = pageIndex;
   const rightIndex = pageIndex + 1;
 
-  function goTo(book: string, chapter: number, p?: number) {
-    const qs = new URLSearchParams();
-    if (p != null) qs.set("p", String(Math.max(0, Math.floor(p))));
-    const q = qs.toString();
-    nav(`/read/${props.translation}/${book}/${chapter}${q ? `?${q}` : ""}`);
-  }
+  // Reader navigation rules encapsulated in a custom hook for reuse and testability.
+  const { isAtBibleStart, isAtBibleEnd, onNext, onPrev } = useReaderNavigation({
+    translation: props.translation,
+    book: props.book,
+    chapter: props.chapter,
+    isMobile,
+    pagesReady: !!pages,
+    totalPages,
+    pageIndex,
+    setPageIndex,
+    layoutKey,
+    navigate: navigateTo,
+  });
 
-  const step = isMobile ? 1 : 2;
-
-  const firstBookId = BIBLE_BOOKS[0]?.id;
-  const lastBook = BIBLE_BOOKS[BIBLE_BOOKS.length - 1];
-
-  const isAtBibleStart =
-    props.book === firstBookId &&
-    props.chapter === 1 &&
-    pageIndex === 0;
-
-  // "última página" considerando step (mobile 1 / desktop 2)
-  const isAtLastPageOfChapter =
-    totalPages > 0 && (pageIndex + step > totalPages - 1);
-
-  const isAtBibleEnd =
-    !!lastBook &&
-    props.book === lastBook.id &&
-    props.chapter === lastBook.chapters &&
-    isAtLastPageOfChapter;
-
-
-  function onNext() {
-    if (!pages || totalPages <= 0) return;
-
-    const nextP = pageIndex + step;
-    if (nextP <= totalPages - 1) {
-      setPageIndex(nextP);
-      return;
-    }
-
-    const nxt = nextChapterRef(props.book, props.chapter);
-    goTo(nxt.book, nxt.chapter, 0);
-  }
-
-  function onPrev() {
-    if (!pages || totalPages <= 0) return;
-
-    const prevP = pageIndex - step;
-    if (prevP >= 0) {
-      setPageIndex(prevP);
-      return;
-    }
-
-    const prv = prevChapterRef(props.book, props.chapter);
-    const last = getSavedLastPage({
-      translation: props.translation,
-      book: prv.book,
-      chapter: prv.chapter,
-      layoutKey,
-    });
-
-    goTo(prv.book, prv.chapter, last);
-  }
-
+  // Loading and error boundaries for chapter data.
   if (res.loading) return <div className="glass">{t(props.translation, "app.loading")}</div>;
-  if (res.error)
-    return (
-      <div className="glass">
-        {t(props.translation, "app.error", { msg: res.error })}
-      </div>
-    );
+
+  if (res.error) {
+    return <div className="glass">{t(props.translation, "app.error", { msg: res.error })}</div>;
+  }
+
   if (!res.data) return null;
 
   return (
     <div className={`book-spread${theme === "dark" ? " theme-dark" : ""}`}>
       <div className="book-gutter" />
 
-      {/* Host invisível: mede com o MESMO layout do paginado */}
-      <div
-        ref={measureHostRef}
-        aria-hidden="true"
-        className="chapter-body chapter-body--paged paging-measure-host"
-        style={{ width: dims.w || 600 }}
-      >
-        {verses.map((v, idx) => (
-          <Verse
-            key={v.verse}
-            refObj={{
-              translation: props.translation,
-              book: props.book,
-              chapter: props.chapter,
-              verse: v.verse,
-            }}
-            text={v.text}
-            dataIndex={idx}
-          />
-        ))}
-      </div>
+      {/* 
+        Hidden measurement host:
+        Renders the entire chapter off-screen with the same paged layout so the pagination
+        engine can compute deterministic verse offsets.
+      */}
+      <ReaderMeasureHost
+        translation={props.translation}
+        book={props.book}
+        chapter={props.chapter}
+        verses={verses}
+        width={width}
+        hostRef={measureHostRef}
+      />
 
       <div className="book-spread-inner">
-        {/* Página esquerda */}
+        {/* Left page (always present). On desktop, this is the left page of the spread. */}
         <section className="page page-left page-col">
-          <header className="page-header">
-            <button
-              className="page-nav-btn"
-              onClick={props.onOpenNav}
-              title={t(props.translation, "reader.menu")}
-              type="button"
-            >
-              ☰
-            </button>
 
-            <div className="page-header-text">
-              <div className="page-header-center">
-                <h2>{title}</h2>
-                <div className="page-sub">
-                  {pages
-                    ? t(props.translation, "reader.totalPages", { total: totalPages })
-                    : ""}
-                </div>
-              </div>
+          {/* Reader header with title, page count and close button. */}
+          <ReaderHeader
+            translation={props.translation}
+            title={title}
+            totalPages={totalPages}
+            hasPages={!!pages}
+            onOpenNav={props.onOpenNav}
+            onClose={onCloseReader}
+          />
 
-              <button
-                type="button"
-                className="page-close-btn"
-                onClick={() => nav("/")}
-                title={t(props.translation, "reader.closeBook")}
-              >
-                {t(props.translation, "reader.closeBook")}
-              </button>
-            </div>
-          </header>
+          {/* 
+            Page viewport:
+            This is the element we measure to determine the effective page size for pagination.
+          */}
+          <ReaderPageColumn
+            translation={props.translation}
+            book={props.book}
+            chapter={props.chapter}
+            pageNumber={pageIndex + 1}
+            hasPages={!!pages}
+            versesSlice={pages?.[leftIndex] ?? null}
+            viewportRef={bodyRef}
+          />
 
-          <div ref={bodyRef} className="page-viewport">
-            <div className="chapter-body chapter-body--paged">
-              {!pages ? (
-                <div className="paging-loading">
-                  {t(props.translation, "reader.calculatingPages")}
-                </div>
-              ) : pages[leftIndex] ? (
-                <VerseSliceView
-                  translation={props.translation}
-                  book={props.book}
-                  chapter={props.chapter}
-                  verses={pages[leftIndex]}
-                />
-              ) : null}
-            </div>
-          </div>
-
-          <div className="page-sub">
-            {pages ? t(props.translation, "reader.pageSingle", { page: pageIndex + 1 }) : ""}
-          </div>
         </section>
 
-        {/* Página direita (desktop) */}
+        {/* Right page (desktop only). On mobile we render a single-page layout. */}
         {!isMobile && (
           <section className="page page-right page-col">
-            <div className="chapter-body chapter-body--paged">
-              {!pages ? null : pages[rightIndex] ? (
-                <VerseSliceView
-                  translation={props.translation}
-                  book={props.book}
-                  chapter={props.chapter}
-                  verses={pages[rightIndex]}
-                />
-              ) : (
-                <div className="chapter-body--unpaged" />
-              )}
-            </div>
-
-            <div className="page-sub">
-              {pages ? t(props.translation, "reader.pageSingle", { page: pageIndex + 2 }) : ""}
-            </div>
+            <ReaderPageColumn
+              translation={props.translation}
+              book={props.book}
+              chapter={props.chapter}
+              pageNumber={pageIndex + 2}
+              hasPages={!!pages}
+              versesSlice={pages?.[rightIndex] ?? null}
+            />
           </section>
         )}
       </div>
 
-      {/* underbar */}
-      <div className="book-underbar">
-        <button
-          className="lang-pill"
-          onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-          title={t(props.translation, theme === "dark" ? "reader.themeDark" : "reader.themeLight")}
-          aria-label={t(props.translation, theme === "dark" ? "reader.themeDark" : "reader.themeLight")}
-          type="button"
-        >
-          {theme === "dark" ? "💡 Off" : "💡 On"}
-        </button>
-        {!isAtBibleStart && (
-          <button
-            className="lang-pill"
-            onClick={onPrev}
-            title={t(props.translation, "reader.prev")}
-            type="button"
-          >
-            {t(props.translation, "reader.prev")}
-          </button>
-        )}
+      {/* Reader underbar: theme toggle, navigation, and translation picker trigger. */}
+      <ReaderUnderbar
+        translation={props.translation}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        hidePrev={isAtBibleStart}
+        hideNext={isAtBibleEnd}
+        onPrev={onPrev}
+        onNext={onNext}
+        onOpenLanguagePicker={onOpenLanguagePicker}
+      />
 
-
-        <button className="lang-pill" onClick={() => setLangOpen(true)} type="button">
-          {t(props.translation, "reader.translationPill", {
-            id: props.translation.toUpperCase(),
-          })}
-        </button>
-
-        {!isAtBibleEnd && (
-          <button
-            className="lang-pill"
-            onClick={onNext}
-            title={t(props.translation, "reader.next")}
-            type="button"
-          >
-            {t(props.translation, "reader.next")}
-          </button>
-        )}
-
-      </div>
-
-      <BottomSheet
+      {/* Translation selection modal (bottom sheet). */}
+      <ReaderLanguageSheet
         open={langOpen}
-        onClose={() => setLangOpen(false)}
-        title={t(props.translation, "reader.selectTranslation")}
-      >
-        <LanguagePicker
-          value={props.translation}
-          onSelect={(next) => {
-            const qs = new URLSearchParams(window.location.search);
-            qs.delete("p"); // evita carregar página inválida na nova tradução
-            const q = qs.toString();
-
-            nav(`/read/${next}/${props.book}/${props.chapter}${q ? `?${q}` : ""}`);
-            setLangOpen(false);
-          }}
-        />
-      </BottomSheet>
+        onClose={onCloseLanguagePicker}
+        translation={props.translation}
+        book={props.book}
+        chapter={props.chapter}
+        onNavigate={navigateTo}
+      />
     </div>
   );
 }

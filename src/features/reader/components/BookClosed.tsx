@@ -1,10 +1,17 @@
+// React and router imports.
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+// Domain imports for translations and last-read position persistence.
 import type { TranslationId } from "../../../shared/bible/refs";
 import { getTranslation } from "../../../shared/bible/translations";
 import { t } from "../../../shared/i18n/ui";
+import { loadLastRead } from "../../../shared/utils/lastRead";
+
+// UI components.
 import BottomSheet from "../../../shared/ui/BottomSheet";
 import LanguagePicker from "../../settings/components/LanguagePicker";
+
 
 const LS_KEY = "bible:translation";
 
@@ -41,6 +48,14 @@ export default function BookClosed() {
   }, [translation]);
 
   function openBook() {
+    const last = loadLastRead();
+    if (last) {
+      // Open the last read book/chapter using the currently selected translation.
+      navigate(`/read/${translation}/${last.book}/${last.chapter}`);
+      return;
+    }
+
+    // Fallback: start at Genesis 1.
     navigate(`/read/${translation}/genesis/1`);
   }
 
