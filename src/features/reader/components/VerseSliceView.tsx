@@ -1,5 +1,5 @@
 import type { BookId, TranslationId } from "../../../shared/bible/refs";
-import type { VerseData } from "../pagination/types";
+import type { VerseData } from "../hooks/pagination/types";
 import Verse from "./Verse";
 
 export default function VerseSliceView(props: {

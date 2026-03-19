@@ -17,7 +17,7 @@ import { useReaderNavigation } from "../hooks/useReaderNavigation";
 import { useReaderLayout } from "../hooks/useReaderLayout";
 
 // Pagination engine that computes deterministic page slices using anchored offsets.
-import { useAnchoredPagination } from "../pagination/useAnchoredPagination";
+import { useAnchoredPagination } from "../hooks/useAnchoredPagination";
 
 // Presentational components for rendering a single verse and a slice of verses (one page).
 import ReaderMeasureHost from "./ReaderMeasureHost";

@@ -5,3 +5,6 @@ export type ChapterData = {
   chapter: number;
   verses: Array<{ verse: number; text: string }>;
 };
+
+export type VerseData = ChapterData["verses"][number];
+
